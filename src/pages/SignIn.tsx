@@ -7,6 +7,7 @@ import './SignIn.css';
 export function SignInPage() {
   const { signIn, isAuthenticated } = useLogto();
   const [agreed, setAgreed] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   if (isAuthenticated) {
@@ -16,6 +17,7 @@ export function SignInPage() {
 
   const handleSignIn = async () => {
     if (!agreed) {
+      setShowError(true);
       MessagePlugin.warning('请先阅读并同意相关协议');
       return;
     }
@@ -49,10 +51,13 @@ export function SignInPage() {
             通过 洛丽通行证 登录
           </Button>
 
-          <div className="signin-agreement">
+          <div className={`signin-agreement ${showError ? 'agreement-error' : ''}`}>
             <Checkbox
               checked={agreed}
-              onChange={(checked) => setAgreed(checked as boolean)}
+              onChange={(checked) => {
+                setAgreed(checked as boolean);
+                if (checked) setShowError(false);
+              }}
             >
               <span className="agreement-text">
                 我已阅读并同意

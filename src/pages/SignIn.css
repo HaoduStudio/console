@@ -52,6 +52,30 @@
 
 .agreement-text .t-link {
   font-size: 13px;
+  transition: color 0.2s linear;
+}
+
+.signin-agreement .t-checkbox {
+  align-items: flex-start !important;
+}
+
+.signin-agreement .t-checkbox__input {
+  margin-top: 3px !important;
+}
+
+.agreement-error .agreement-text {
+  color: var(--td-error-color, #e34d59);
+  transition: color 0.2s linear;
+}
+
+.agreement-error .agreement-text .t-link {
+  color: var(--td-error-color, #e34d59) !important;
+  transition: color 0.2s linear;
+}
+
+.agreement-error .t-checkbox__input {
+  border-color: var(--td-error-color, #e34d59) !important;
+  transition: border-color 0.2s linear;
 }
 
 /* 响应式适配 */
