@@ -1,0 +1,70 @@
+.signin-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--td-bg-color-page);
+  padding: 20px;
+}
+
+.signin-card {
+  background: var(--td-bg-color-container);
+  border-radius: 6px;
+  box-shadow: var(--td-shadow-1);
+  padding: 32px 32px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.signin-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.signin-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--td-text-color-primary);
+  margin: 0 0 8px 0;
+}
+
+.signin-subtitle {
+  font-size: 14px;
+  color: var(--td-text-color-secondary);
+  margin: 0;
+}
+
+.signin-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.signin-agreement {
+  margin-top: 8px;
+}
+
+.agreement-text {
+  font-size: 13px;
+  color: var(--td-text-color-secondary);
+  line-height: 1.6;
+}
+
+.agreement-text .t-link {
+  font-size: 13px;
+}
+
+/* 响应式适配 */
+@media (max-width: 480px) {
+  .signin-card {
+    padding: 32px 24px;
+  }
+
+  .signin-title {
+    font-size: 24px;
+  }
+
+  .signin-subtitle {
+    font-size: 14px;
+  }
+}

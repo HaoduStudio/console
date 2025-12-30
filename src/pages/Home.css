@@ -1,0 +1,26 @@
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: var(--td-bg-color-page);
+}
+
+.home-container h1 {
+  font-size: 32px;
+  margin-bottom: 16px;
+  color: var(--td-text-color-primary);
+}
+
+.home-container p {
+  font-size: 16px;
+  color: var(--td-text-color-secondary);
+  margin-bottom: 32px;
+}
+
+.home-actions {
+  display: flex;
+  gap: 16px;
+}

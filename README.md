@@ -9,7 +9,7 @@
 ## 特性
 
 - 👋 清晰明了的用户交互体验，支持暗色与自动主题样式
-- 👉 基于 [Better-Auth](https://www.better-auth.com/) 的高性能账户系统基层架构
+- 👉 基于 [Logto](https://www.logto.io/) 的高性能账户系统基层架构
 - Comming Soon...
 
 ## 调试
