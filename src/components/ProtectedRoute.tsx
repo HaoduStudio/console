@@ -14,24 +14,25 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useLogto();
   const location = useLocation();
 
-  // 正在加载认证状态时显示加载中
+  if (isAuthenticated) {
+    return <>{children}</>;
+  }
+
   if (isLoading) {
     return (
       <div style={{ 
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center', 
-        height: '100vh' 
+        height: '100vh',
+        flexDirection: 'column',
+        gap: '16px'
       }}>
-        加载中...
+        <div>加载中...</div>
+        <div style={{ fontSize: '12px', color: '#888' }}>正在处理您的账户信息...</div>
       </div>
     );
   }
 
-  // 未登录则重定向到登录页面
-  if (!isAuthenticated) {
-    return <Navigate to="/signin" state={{ from: location }} replace />;
-  }
-
-  return <>{children}</>;
+  return <Navigate to="/signin" state={{ from: location }} replace />;
 }

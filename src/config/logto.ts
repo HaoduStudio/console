@@ -1,4 +1,12 @@
-import type { LogtoConfig } from '@logto/react';
+import type { LogtoConfig } from '@logto/react'
+
+const parseResources = (): string[] => {
+  const resourcesEnv = import.meta.env.VITE_LOGTO_RESOURCES;
+  if (!resourcesEnv || resourcesEnv.trim() === '') {
+    return [];
+  }
+  return resourcesEnv.split(',').map((r: string) => r.trim()).filter(Boolean);
+};
 
 // Logto 配置 - 请根据你的自部署 Logto 实例修改这些值
 export const logtoConfig: LogtoConfig = {
@@ -7,7 +15,7 @@ export const logtoConfig: LogtoConfig = {
   // 应用 ID (在 Logto 控制台创建应用后获取)
   appId: import.meta.env.VITE_LOGTO_APP_ID || 'your-app-id',
   // 资源标识符 (可选，用于 API 认证)
-  resources: import.meta.env.VITE_LOGTO_RESOURCES?.split(',') || [],
+  resources: parseResources(),
   // 权限范围
   scopes: ['openid', 'profile', 'email'],
 };

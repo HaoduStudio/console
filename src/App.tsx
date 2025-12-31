@@ -6,6 +6,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { SignInPage } from './pages/SignIn';
 import { CallbackPage } from './pages/Callback';
 import { HomePage } from './pages/Home';
+import { MainLayout } from './layouts/MainLayout';
 
 import 'tdesign-react/es/style/index.css';
 
@@ -37,7 +38,9 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <HomePage />
+                <MainLayout>
+                  <HomePage />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
@@ -45,7 +48,9 @@ function App() {
             path="*"
             element={
               <ProtectedRoute>
-                <HomePage />
+                <MainLayout>
+                  <HomePage />
+                </MainLayout>
               </ProtectedRoute>
             }
           />
