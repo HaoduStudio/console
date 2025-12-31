@@ -5,10 +5,23 @@ import { redirectUri } from '../config/logto';
 import './SignIn.css';
 
 export function SignInPage() {
-  const { signIn, isAuthenticated } = useLogto();
+  const { signIn, isAuthenticated, isLoading } = useLogto();
   const [agreed, setAgreed] = useState(false);
   const [showError, setShowError] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh'
+      }}>
+        加载中...
+      </div>
+    );
+  }
 
   if (isAuthenticated) {
     window.location.href = '/';
@@ -53,6 +66,7 @@ export function SignInPage() {
 
           <div className={`signin-agreement ${showError ? 'agreement-error' : ''}`}>
             <Checkbox
+              name="agreement"
               checked={agreed}
               onChange={(checked) => {
                 setAgreed(checked as boolean);
