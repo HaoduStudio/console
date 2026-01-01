@@ -1,0 +1,146 @@
+.main-layout {
+  min-height: 100vh;
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  background: var(--td-bg-color-container);
+  border-bottom: 1px solid var(--td-component-stroke);
+  height: 64px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--td-text-color-primary);
+}
+
+.menu-toggle-btn {
+  flex-shrink: 0;
+}
+
+.menu-toggle-btn .t-icon {
+  font-size: 24px;
+}
+
+.main-body {
+  min-height: calc(100vh - 64px);
+}
+
+/* 侧边栏样式 */
+.main-aside {
+  transition: width 0.2s ease;
+  background: var(--td-bg-color-container);
+  border-right: 1px solid var(--td-component-stroke);
+  overflow: hidden;
+}
+
+.main-aside .t-menu {
+  background: transparent;
+}
+
+.main-aside .t-menu__item .t-icon,
+.main-aside .t-submenu__title .t-icon {
+  margin-right: 12px;
+}
+
+.main-aside .t-menu.t-is-collapsed .t-menu__item .t-icon,
+.main-aside .t-menu.t-is-collapsed .t-submenu__title .t-icon {
+  margin-right: 0;
+}
+
+.main-content {
+  padding: 24px;
+  background: var(--td-bg-color-page);
+  min-height: calc(100vh - 64px);
+  overflow-x: hidden;
+}
+
+@media (max-width: 1024px) {
+  .main-header {
+    padding: 0 16px;
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+
+  .app-title {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-header {
+    padding: 0 12px;
+    height: 56px;
+  }
+
+  .header-left {
+    gap: 8px;
+  }
+
+  .header-right {
+    gap: 8px;
+  }
+
+  .app-title {
+    font-size: 16px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .main-body {
+    min-height: calc(100vh - 56px);
+  }
+
+  .main-content {
+    padding: 12px;
+    min-height: calc(100vh - 56px);
+  }
+}
+
+@media (max-width: 480px) {
+  .main-header {
+    padding: 0 8px;
+  }
+
+  .app-title {
+    max-width: 120px;
+  }
+
+  .main-content {
+    padding: 8px;
+  }
+}
+
+.t-drawer .t-menu {
+  border: none;
+  background: transparent;
+}
+
+.t-drawer .t-drawer__body {
+  padding: 0;
+}
+
+.t-drawer .t-drawer__header {
+  padding: 16px;
+  border-bottom: 1px solid var(--td-component-stroke);
+}

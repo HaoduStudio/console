@@ -1,11 +1,10 @@
 .home-container {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 20px;
-  background-color: var(--td-bg-color-page);
+  padding: 40px 20px;
+  min-height: 400px;
 }
 
 .home-container h1 {
@@ -23,4 +22,43 @@
 .home-actions {
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* 平板适配 */
+@media (max-width: 1024px) {
+  .home-container {
+    padding: 32px 16px;
+  }
+
+  .home-container h1 {
+    font-size: 28px;
+  }
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .home-container {
+    padding: 24px 12px;
+    min-height: 300px;
+  }
+
+  .home-container h1 {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .home-container p {
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .home-actions {
+    width: 100%;
+  }
+
+  .home-actions .t-button {
+    width: 100%;
+  }
 }

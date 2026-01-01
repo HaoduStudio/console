@@ -73,21 +73,67 @@
   color: var(--td-text-color-secondary);
 }
 
-/* 响应式布局 */
+/* 平板适配 */
+@media (max-width: 1024px) {
+  .user-center-container {
+    padding: 20px;
+    max-width: 100%;
+  }
+
+  .user-center-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+}
+
+/* 移动端适配 */
 @media (max-width: 768px) {
   .user-center-container {
     padding: 16px;
   }
 
+  .user-center-title {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
   .avatar-section {
     flex-direction: column;
     align-items: flex-start;
+    gap: 16px;
   }
 
   .security-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+
+  .security-info {
+    gap: 12px;
+  }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 480px) {
+  .user-center-container {
+    padding: 12px;
+  }
+
+  .user-center-title {
+    font-size: 18px;
+  }
+
+  .security-icon {
+    font-size: 20px;
+  }
+
+  .security-title {
+    font-size: 13px;
+  }
+
+  .security-desc {
+    font-size: 11px;
   }
 }
 
