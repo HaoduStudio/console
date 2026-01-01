@@ -1,4 +1,5 @@
 import type { LogtoConfig } from '@logto/react'
+import { UserScope } from '@logto/react'
 
 const parseResources = (): string[] => {
   const resourcesEnv = import.meta.env.VITE_LOGTO_RESOURCES;
@@ -16,8 +17,22 @@ export const logtoConfig: LogtoConfig = {
   appId: import.meta.env.VITE_LOGTO_APP_ID || 'your-app-id',
   // 资源标识符 (可选，用于 API 认证)
   resources: parseResources(),
-  // 权限范围
-  scopes: ['openid', 'profile', 'email'],
+  scopes: [
+    'openid',
+    'profile',
+    UserScope.Email,
+    UserScope.Phone,
+    UserScope.Profile,
+    UserScope.Identities,
+  ],
+};
+
+// 获取 Logto API 地址
+export const getLogtoApiBase = (): string => {
+  const endpoint = import.meta.env.VITE_LOGTO_ENDPOINT || 'https://your-logto-instance.com';
+  // 确保 endpoint 不以斜杠结尾，避免双斜杠问题
+  const cleanEndpoint = endpoint.replace(/\/+$/, '');
+  return `${cleanEndpoint}/api`;
 };
 
 // 回调 URL 配置

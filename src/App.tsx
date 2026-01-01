@@ -6,6 +6,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { SignInPage } from './pages/SignIn';
 import { CallbackPage } from './pages/Callback';
 import { HomePage } from './pages/Home';
+import { UserCenterPage } from './pages/UserCenter';
 import { MainLayout } from './layouts/MainLayout';
 
 import 'tdesign-react/es/style/index.css';
@@ -40,6 +41,16 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <HomePage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <UserCenterPage />
                 </MainLayout>
               </ProtectedRoute>
             }

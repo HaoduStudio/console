@@ -1,0 +1,124 @@
+.user-center-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.user-center-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--td-text-color-primary);
+}
+
+.user-center-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+.user-center-card {
+  margin-bottom: 0;
+  background: transparent;
+  border: 1px solid var(--td-component-stroke);
+}
+
+.user-center-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+/* 头像区域 */
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.avatar-actions {
+  flex: 1;
+}
+
+/* 安全设置项 */
+.security-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.security-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.security-icon {
+  font-size: 24px;
+  color: var(--td-brand-color);
+}
+
+.security-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--td-text-color-primary);
+  margin-bottom: 4px;
+}
+
+.security-desc {
+  font-size: 12px;
+  color: var(--td-text-color-secondary);
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .user-center-container {
+    padding: 16px;
+  }
+
+  .avatar-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .security-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* 表单样式调整 */
+.user-center-card .t-form__item {
+  margin-bottom: 16px;
+}
+
+.user-center-card .t-form__item:last-child {
+  margin-bottom: 0;
+}
+
+/* Tabs 样式调整 */
+.user-center-container .t-tabs__nav {
+  margin-bottom: 8px;
+  background: transparent;
+}
+
+.user-center-container .t-tabs {
+  background: transparent;
+}
+
+.user-center-container .t-tabs__content {
+  background: transparent;
+}
+
+/* 对话框内表单样式 */
+.t-dialog .t-form__item {
+  margin-bottom: 16px;
+}
+
+.t-dialog .t-divider {
+  margin: 16px 0;
+}
