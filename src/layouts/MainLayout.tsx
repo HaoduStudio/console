@@ -10,9 +10,7 @@ import {
   NotificationIcon, 
   UserIcon, 
   LogoutIcon,
-  ViewListIcon,
-  MenuFoldIcon,
-  MenuUnfoldIcon
+  ViewListIcon
 } from 'tdesign-icons-react';
 import { useLogto } from '@logto/react';
 import { postSignOutRedirectUri } from '../config/logto';
