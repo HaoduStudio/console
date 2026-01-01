@@ -1,0 +1,52 @@
+
+name: Build and Deploy
+
+on:
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  Deploy-Preview:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.11.0'
+
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to Pages
+        id: deploy
+        run: |
+          echo "Deploying to EdgeOne Pages..."
+          DEPLOY_OUTPUT=$(npx edgeone pages deploy ./.next -n next-mix-render-template -t ${{ secrets.EDGEONE_TOKEN }} -e preview 2>&1)
+          
+          DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep "EDGEONE_DEPLOY_URL=" | cut -d'=' -f2-)
+          echo "DEPLOY_URL=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          
+          PROJECT_ID=$(echo "$DEPLOY_OUTPUT" | grep "EDGEONE_PROJECT_ID=" | cut -d'=' -f2-)
+          echo "PROJECT_ID=$PROJECT_ID" >> $GITHUB_OUTPUT
+
+          DEPLOY_END_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "DEPLOY_END_TIME=$DEPLOY_END_TIME" >> $GITHUB_OUTPUT
+
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_TOKEN }}
+
+      - name: Enable PR comments
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            🚀 **预览版本部署完成**
+            
+            | 项目 | 预览链接 | 项目ID | 更新时间 |
+            |---|---|---|---|
+            | [${{ github.event.repository.name }}](https://console.tencentcloud.com/edgeone/pages/project/${{ steps.deploy.outputs.PROJECT_ID }}/deploy) | [🔗 点击预览](${{ steps.deploy.outputs.DEPLOY_URL }}) | ${{ steps.deploy.outputs.PROJECT_ID }} | ${{ steps.deploy.outputs.DEPLOY_END_TIME }} |
