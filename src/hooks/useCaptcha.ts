@@ -4,7 +4,7 @@ import {
   isCaptchaEnabled,
 } from '../services/captchaService';
 import {
-  verifyPasswordWithCaptcha,
+  verifyPasswordWithCaptcha as verifyPasswordApi,
   isSecurityApiEnabled,
   type VerifyPasswordResponse,
 } from '../services/securityApi';
@@ -151,7 +151,7 @@ export const useCaptcha = (options: UseCaptchaOptions): UseCaptchaReturn => {
       }
 
       // 2. 调用后端接口进行密码验证并获取 verificationRecordId
-      const result = await verifyPasswordWithCaptcha(
+      const result = await verifyPasswordApi(
         captchaVerifyParam,
         password,
         accessToken
