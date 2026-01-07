@@ -1,4 +1,5 @@
 import { getLogtoApiBase } from '../config/logto';
+import { handleAuthenticationFailure, isAuthenticationError } from './authUtils';
 
 export interface AccountInfo {
   id: string;
@@ -36,6 +37,14 @@ export class AccountApiService {
     this.apiBase = getLogtoApiBase();
   }
 
+  /**
+   * 获取当前 access token
+   * 用于传递给后端安全 API
+   */
+  getAccessToken(): string {
+    return this.accessToken;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -51,6 +60,14 @@ export class AccountApiService {
     });
 
     if (!response.ok) {
+      // 检查是否为认证错误（401 未授权）
+      if (isAuthenticationError(response.status)) {
+        const errorData = await response.json().catch(() => ({}));
+        await handleAuthenticationFailure(
+          errorData.message || 'Token 无效或已过期，请重新登录'
+        );
+      }
+      
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `请求失败: ${response.status}`);
     }
@@ -90,7 +107,12 @@ export class AccountApiService {
     });
   }
 
+  /**
+   * @deprecated 密码验证现在通过后端安全 API 代理进行，请使用 SecurityApiService.verifyPassword()
+   * 直接调用此方法将不会通过验证码验证
+   */
   async verifyPassword(password: string): Promise<VerificationRecordResponse> {
+    console.warn('AccountApiService.verifyPassword() 已弃用，请使用 SecurityApiService.verifyPassword() 通过后端代理验证');
     return this.request<VerificationRecordResponse>('/verifications/password', {
       method: 'POST',
       body: JSON.stringify({ password }),

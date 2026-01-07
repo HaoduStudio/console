@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLogto } from '@logto/react';
 import {
   Card,
@@ -24,6 +24,15 @@ import {
   CloseIcon,
 } from 'tdesign-icons-react';
 import { AccountApiService, type AccountInfo } from '../services/accountApi';
+import {
+  CaptchaManager,
+  isCaptchaEnabled,
+  loadCaptchaScript,
+} from '../services/captchaService';
+import {
+  verifyPasswordWithCaptcha,
+  isSecurityApiEnabled,
+} from '../services/securityApi';
 import './UserCenter.css';
 
 const { FormItem } = Form;
@@ -83,6 +92,41 @@ export function UserCenterPage() {
   const [phoneVerificationId, setPhoneVerificationId] = useState('');
   const [emailCountdown, setEmailCountdown] = useState(0);
   const [phoneCountdown, setPhoneCountdown] = useState(0);
+
+  // Captcha 相关状态
+  const [captchaVerifying, setCaptchaVerifying] = useState(false);
+  const emailCaptchaManagerRef = useRef<CaptchaManager | null>(null);
+  const phoneCaptchaManagerRef = useRef<CaptchaManager | null>(null);
+  const passwordCaptchaManagerRef = useRef<CaptchaManager | null>(null);
+  const captchaEnabled = isCaptchaEnabled();
+  const securityApiEnabled = isSecurityApiEnabled();
+
+  // 初始化 Captcha
+  useEffect(() => {
+    if (!captchaEnabled) return;
+
+    const initCaptcha = async () => {
+      try {
+        await loadCaptchaScript();
+        
+        // 初始化邮箱验证码 Captcha
+        const emailManager = new CaptchaManager();
+        emailCaptchaManagerRef.current = emailManager;
+        
+        // 初始化手机验证码 Captcha
+        const phoneManager = new CaptchaManager();
+        phoneCaptchaManagerRef.current = phoneManager;
+
+        // 初始化密码验证 Captcha（用于敏感操作前的身份验证）
+        const passwordManager = new CaptchaManager();
+        passwordCaptchaManagerRef.current = passwordManager;
+      } catch (error) {
+        console.error('Captcha 初始化失败:', error);
+      }
+    };
+
+    initCaptcha();
+  }, [captchaEnabled]);
 
   // 初始化 Account API 服务
   const initAccountService = useCallback(async () => {
@@ -181,16 +225,61 @@ export function UserCenterPage() {
   };
 
   // 验证当前密码（仅用于验证对话框）
+  // 使用后端安全 API 代理进行验证码验证 + 密码验证
   const handleVerifyPasswordForAction = async () => {
     if (!accountService || !currentPassword) {
       MessagePlugin.warning('请输入当前密码');
       return;
     }
+
+    // 检查后端安全 API 是否可用
+    if (!securityApiEnabled) {
+      MessagePlugin.error('安全服务未配置，无法进行身份验证');
+      return;
+    }
+
     setVerifying(true);
+
     try {
-      const result = await accountService.verifyPassword(currentPassword);
-      setVerificationRecordId(result.verificationRecordId);
-      MessagePlugin.success('密码验证成功');
+      // 1. 如果启用了 Captcha，先进行人机验证
+      let captchaVerifyParam = '';
+      if (captchaEnabled && passwordCaptchaManagerRef.current) {
+        setCaptchaVerifying(true);
+        try {
+          // 初始化并触发验证
+          await passwordCaptchaManagerRef.current.initialize(
+            '#password-captcha-element',
+            '#password-captcha-trigger-btn'
+          );
+          captchaVerifyParam = await passwordCaptchaManagerRef.current.triggerVerification();
+          if (!captchaVerifyParam) {
+            MessagePlugin.error('人机验证失败，请重试');
+            return;
+          }
+        } catch (error) {
+          // 用户取消验证或验证失败
+          if (error instanceof Error && error.message !== '用户取消验证') {
+            MessagePlugin.error('人机验证失败，请重试');
+          }
+          return;
+        } finally {
+          setCaptchaVerifying(false);
+        }
+      }
+
+      // 2. 获取 access token
+      const accessToken = accountService.getAccessToken();
+
+      // 3. 调用后端安全 API 进行密码验证
+      const result = await verifyPasswordWithCaptcha(
+        captchaVerifyParam,
+        currentPassword,
+        accessToken
+      );
+
+      // 后端返回的是 snake_case，需要转换
+      setVerificationRecordId(result.verification_record_id);
+      MessagePlugin.success('身份验证成功');
       
       // 关闭验证对话框
       setVerifyPasswordDialogVisible(false);
@@ -204,8 +293,8 @@ export function UserCenterPage() {
         setPhoneDialogVisible(true);
       }
     } catch (error) {
-      console.error('密码验证失败:', error);
-      MessagePlugin.error('密码验证失败，请检查当前密码是否正确');
+      console.error('身份验证失败:', error);
+      MessagePlugin.error(error instanceof Error ? error.message : '身份验证失败，请检查当前密码是否正确');
     } finally {
       setVerifying(false);
     }
@@ -242,7 +331,7 @@ export function UserCenterPage() {
     }
   };
 
-  // 发送邮箱验证码
+  // 发送邮箱验证码（带 Captcha 验证）
   const handleSendEmailCode = async () => {
     if (!accountService || !newEmail) {
       MessagePlugin.warning('请输入新邮箱地址');
@@ -253,6 +342,31 @@ export function UserCenterPage() {
     if (!emailRegex.test(newEmail)) {
       MessagePlugin.warning('请输入有效的邮箱地址');
       return;
+    }
+
+    // 如果启用了 Captcha，先进行人机验证（纯前端门槛，无后端验签）
+    if (captchaEnabled && emailCaptchaManagerRef.current) {
+      setCaptchaVerifying(true);
+      try {
+        // 初始化并触发验证
+        await emailCaptchaManagerRef.current.initialize(
+          '#email-captcha-element',
+          '#email-captcha-trigger-btn'
+        );
+        const captchaVerifyParam = await emailCaptchaManagerRef.current.triggerVerification();
+        if (!captchaVerifyParam) {
+          MessagePlugin.error('人机验证失败，请重试');
+          return;
+        }
+      } catch (error) {
+        // 用户取消验证或验证失败
+        if (error instanceof Error && error.message !== '用户取消验证') {
+          MessagePlugin.error('人机验证失败，请重试');
+        }
+        return;
+      } finally {
+        setCaptchaVerifying(false);
+      }
     }
 
     try {
@@ -305,7 +419,7 @@ export function UserCenterPage() {
     }
   };
 
-  // 发送手机验证码
+  // 发送手机验证码（带 Captcha 验证）
   const handleSendPhoneCode = async () => {
     if (!accountService || !newPhone) {
       MessagePlugin.warning('请输入新手机号');
@@ -315,6 +429,31 @@ export function UserCenterPage() {
     if (!phoneRegex.test(newPhone)) {
       MessagePlugin.warning('请输入有效的手机号');
       return;
+    }
+
+    // 如果启用了 Captcha，先进行人机验证（纯前端门槛，无后端验签）
+    if (captchaEnabled && phoneCaptchaManagerRef.current) {
+      setCaptchaVerifying(true);
+      try {
+        // 初始化并触发验证
+        await phoneCaptchaManagerRef.current.initialize(
+          '#phone-captcha-element',
+          '#phone-captcha-trigger-btn'
+        );
+        const captchaVerifyParam = await phoneCaptchaManagerRef.current.triggerVerification();
+        if (!captchaVerifyParam) {
+          MessagePlugin.error('人机验证失败，请重试');
+          return;
+        }
+      } catch (error) {
+        // 用户取消验证或验证失败
+        if (error instanceof Error && error.message !== '用户取消验证') {
+          MessagePlugin.error('人机验证失败，请重试');
+        }
+        return;
+      } finally {
+        setCaptchaVerifying(false);
+      }
     }
 
     try {
@@ -611,7 +750,7 @@ export function UserCenterPage() {
           setPendingAction(null);
         }}
         onConfirm={handleVerifyPasswordForAction}
-        confirmBtn={{ loading: verifying, content: '验证' }}
+        confirmBtn={{ loading: verifying || captchaVerifying, content: captchaVerifying ? '验证中...' : '验证' }}
       >
         <Form labelWidth={100} labelAlign="right">
           <FormItem label="当前密码" requiredMark>
@@ -624,6 +763,9 @@ export function UserCenterPage() {
             />
           </FormItem>
         </Form>
+        {/* Captcha 元素（用于密码验证前的人机验证） */}
+        <div id="password-captcha-element" style={{ display: 'none' }} />
+        <button id="password-captcha-trigger-btn" type="button" style={{ display: 'none' }} />
       </Dialog>
 
       {/* 修改密码对话框 */}
@@ -686,15 +828,20 @@ export function UserCenterPage() {
                 style={{ width: '150px' }}
               />
               <Button
+                id="email-send-code-btn"
                 variant="outline"
-                disabled={emailCountdown > 0}
+                disabled={emailCountdown > 0 || captchaVerifying}
+                loading={captchaVerifying}
                 onClick={handleSendEmailCode}
               >
-                {emailCountdown > 0 ? `${emailCountdown}秒后重发` : '发送验证码'}
+                {captchaVerifying ? '验证中...' : (emailCountdown > 0 ? `${emailCountdown}秒后重发` : '发送验证码')}
               </Button>
             </Space>
           </FormItem>
         </Form>
+        {/* Captcha */}
+        <div id="email-captcha-element" style={{ display: 'none' }} />
+        <button id="email-captcha-trigger-btn" type="button" style={{ display: 'none' }} />
       </Dialog>
 
       {/* 修改手机号对话框 */}
@@ -742,15 +889,20 @@ export function UserCenterPage() {
                 style={{ width: '150px' }}
               />
               <Button
+                id="phone-send-code-btn"
                 variant="outline"
-                disabled={phoneCountdown > 0}
+                disabled={phoneCountdown > 0 || captchaVerifying}
+                loading={captchaVerifying}
                 onClick={handleSendPhoneCode}
               >
-                {phoneCountdown > 0 ? `${phoneCountdown}秒后重发` : '发送验证码'}
+                {captchaVerifying ? '验证中...' : (phoneCountdown > 0 ? `${phoneCountdown}秒后重发` : '发送验证码')}
               </Button>
             </Space>
           </FormItem>
         </Form>
+        {/* Captcha */}
+        <div id="phone-captcha-element" style={{ display: 'none' }} />
+        <button id="phone-captcha-trigger-btn" type="button" style={{ display: 'none' }} />
       </Dialog>
     </div>
   );
