@@ -117,9 +117,9 @@ export async function verifyPasswordWithCaptcha(
 ): Promise<VerifyPasswordResponse> {
   // 调试日志：确认参数传递正确
   console.log('[securityApi] verifyPasswordWithCaptcha 参数:', {
-    captchaVerifyParam: captchaVerifyParam.substring(0, 20) + '...',
-    passwordLength: password.length,
-    accessTokenLength: accessToken.length,
+    captchaVerifyParam: captchaVerifyParam ? captchaVerifyParam.substring(0, 20) + '...' : 'undefined/null',
+    passwordLength: password?.length ?? 'undefined',
+    accessTokenLength: accessToken?.length ?? 'undefined',
     captchaSceneId,
   });
 
@@ -134,9 +134,10 @@ export async function verifyPasswordWithCaptcha(
   }
 
   console.log('[securityApi] 请求体:', {
-    ...body,
-    password: '***',
-    access_token: '***'
+    captcha_verify_param: captchaVerifyParam ? 'exists' : 'missing',
+    password: password ? '***' : 'missing',
+    access_token: accessToken ? '***' : 'missing',
+    captcha_scene_id: captchaSceneId,
   });
 
   return securityRequest<VerifyPasswordResponse>('/v1/security/verify_password', {
