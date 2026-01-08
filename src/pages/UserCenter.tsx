@@ -242,8 +242,15 @@ export function UserCenterPage() {
     setCaptchaVerifying(true);
 
     try {
-      // 1. 获取 access token
-      const accessToken = accountService.getAccessToken();
+      // 1. 实时获取最新的 access token（避免使用缓存的过期 token）
+      // 必须指定 resource 才能获取有效的 access token
+      const resource = import.meta.env.VITE_API_BASE || 'https://api.dailys.zone';
+      const accessToken = await getAccessToken(resource);
+      
+      if (!accessToken) {
+        MessagePlugin.error('无法获取访问令牌，请重新登录');
+        return;
+      }
 
       // 2. 调用封装好的方法：自动处理 Captcha 验证 + 后端密码验证
       const result = await verifyPasswordWithCaptcha(
