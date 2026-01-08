@@ -82,8 +82,7 @@ export const useCaptcha = (options: UseCaptchaOptions): UseCaptchaReturn => {
    */
   const verifyCaptcha = useCallback(async (): Promise<string | null> => {
     if (!isEnabled) {
-      // 未启用验证码时返回空字符串（允许继续）
-      return '';
+      throw new Error('验证码调用失败');
     }
 
     if (!managerRef.current) {
@@ -93,8 +92,10 @@ export const useCaptcha = (options: UseCaptchaOptions): UseCaptchaReturn => {
         managerRef.current = manager;
       } catch (err) {
         console.error('Failed to initialize captcha on demand:', err);
-        // 初始化失败时允许继续（降级处理）
-        return '';
+        const error = err instanceof Error ? err : new Error('验证码初始化失败');
+        setError(error);
+        onFail?.(error);
+        return null;
       }
     }
 
@@ -141,7 +142,10 @@ export const useCaptcha = (options: UseCaptchaOptions): UseCaptchaReturn => {
     setError(null);
 
     try {
-      // 1. 先完成验证码验证
+      if (!isEnabled) {
+        throw new Error('验证码未启用，无法进行安全验证');
+      }
+      
       const captchaVerifyParam = await verifyCaptcha();
       
       // 如果验证码未启用，返回空字符串允许继续；如果启用但验证失败，返回 null

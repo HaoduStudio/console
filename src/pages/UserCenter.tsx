@@ -239,43 +239,22 @@ export function UserCenterPage() {
     }
 
     setVerifying(true);
+    setCaptchaVerifying(true);
 
     try {
-      // 1. 如果启用了 Captcha，先进行人机验证
-      let captchaVerifyParam = '';
-      if (captchaEnabled && passwordCaptchaManagerRef.current) {
-        setCaptchaVerifying(true);
-        try {
-          // 初始化并触发验证
-          await passwordCaptchaManagerRef.current.initialize(
-            '#password-captcha-element',
-            '#password-captcha-trigger-btn'
-          );
-          captchaVerifyParam = await passwordCaptchaManagerRef.current.triggerVerification();
-          if (!captchaVerifyParam) {
-            MessagePlugin.error('人机验证失败，请重试');
-            return;
-          }
-        } catch (error) {
-          // 用户取消验证或验证失败
-          if (error instanceof Error && error.message !== '用户取消验证') {
-            MessagePlugin.error('人机验证失败，请重试');
-          }
-          return;
-        } finally {
-          setCaptchaVerifying(false);
-        }
-      }
-
-      // 2. 获取 access token
+      // 1. 获取 access token
       const accessToken = accountService.getAccessToken();
 
-      // 3. 调用后端安全 API 进行密码验证
+      // 2. 调用封装好的方法：自动处理 Captcha 验证 + 后端密码验证
       const result = await verifyPasswordWithCaptcha(
-        captchaVerifyParam,
         currentPassword,
         accessToken
       );
+
+      if (!result) {
+        // 验证失败（错误已在 hook 中处理并显示）
+        return;
+      }
 
       // 后端返回的是 snake_case，需要转换
       setVerificationRecordId(result.verification_record_id);
