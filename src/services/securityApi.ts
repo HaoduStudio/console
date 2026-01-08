@@ -115,6 +115,14 @@ export async function verifyPasswordWithCaptcha(
   accessToken: string,
   captchaSceneId?: string
 ): Promise<VerifyPasswordResponse> {
+  // 调试日志：确认参数传递正确
+  console.log('[securityApi] verifyPasswordWithCaptcha 参数:', {
+    captchaVerifyParam: captchaVerifyParam.substring(0, 20) + '...',
+    passwordLength: password.length,
+    accessTokenLength: accessToken.length,
+    captchaSceneId,
+  });
+
   const body: VerifyPasswordRequest = {
     captcha_verify_param: captchaVerifyParam,
     password,
@@ -124,6 +132,12 @@ export async function verifyPasswordWithCaptcha(
   if (captchaSceneId) {
     body.captcha_scene_id = captchaSceneId;
   }
+
+  console.log('[securityApi] 请求体:', {
+    ...body,
+    password: '***',
+    access_token: '***'
+  });
 
   return securityRequest<VerifyPasswordResponse>('/v1/security/verify_password', {
     method: 'POST',

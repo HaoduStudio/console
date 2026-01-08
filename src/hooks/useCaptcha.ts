@@ -138,17 +138,21 @@ export const useCaptcha = (options: UseCaptchaOptions): UseCaptchaReturn => {
       return null;
     }
 
+    // 检查验证码是否启用
+    if (!isEnabled) {
+      const err = new Error('验证码未启用，无法进行安全验证');
+      setError(err);
+      onFail?.(err);
+      return null;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
-      if (!isEnabled) {
-        throw new Error('验证码未启用，无法进行安全验证');
-      }
-      
+      // 1. 先完成验证码验证
       const captchaVerifyParam = await verifyCaptcha();
       
-      // 如果验证码未启用，返回空字符串允许继续；如果启用但验证失败，返回 null
       if (captchaVerifyParam === null) {
         // 验证失败，错误已在 verifyCaptcha 中设置
         return null;
@@ -171,7 +175,7 @@ export const useCaptcha = (options: UseCaptchaOptions): UseCaptchaReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [verifyCaptcha, onSuccess, onFail]);
+  }, [isEnabled, verifyCaptcha, onSuccess, onFail]);
 
   return {
     isLoading,
