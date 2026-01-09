@@ -121,6 +121,10 @@ export class CaptchaManager {
     this.lastCaptchaVerifyParam = null;
   }
 
+  isInitialized(): boolean {
+    return this.initialized;
+  }
+
   async initialize(elementId: string, buttonId: string): Promise<void> {
     if (this.initialized) {
       return;

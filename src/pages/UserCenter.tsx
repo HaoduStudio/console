@@ -252,8 +252,29 @@ export function UserCenterPage() {
         return;
       }
 
-      // 2. 调用封装好的方法：自动处理 Captcha 验证 + 后端密码验证
+      // 2. 触发验证码验证获取 captchaVerifyParam
+      let captchaVerifyParam: string | null = null;
+      if (captchaEnabled && passwordCaptchaManagerRef.current) {
+        // 确保 CaptchaManager 已初始化
+        if (!passwordCaptchaManagerRef.current.isInitialized()) {
+          await passwordCaptchaManagerRef.current.initialize(
+            'verify-password-captcha-element',
+            'verify-password-btn'
+          );
+        }
+        captchaVerifyParam = await passwordCaptchaManagerRef.current.triggerVerification();
+        if (!captchaVerifyParam) {
+          MessagePlugin.error('人机验证失败，请重试');
+          return;
+        }
+      } else if (captchaEnabled) {
+        MessagePlugin.error('验证码服务未初始化，请刷新页面重试');
+        return;
+      }
+
+      // 3. 调用后端 API 进行密码验证
       const result = await verifyPasswordWithCaptcha(
+        captchaVerifyParam || '',
         currentPassword,
         accessToken
       );
