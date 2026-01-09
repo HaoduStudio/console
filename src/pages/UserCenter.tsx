@@ -29,10 +29,6 @@ import {
   isCaptchaEnabled,
   loadCaptchaScript,
 } from '../services/captchaService';
-import {
-  verifyPasswordWithCaptcha,
-  isSecurityApiEnabled,
-} from '../services/securityApi';
 import './UserCenter.css';
 
 const { FormItem } = Form;
@@ -99,7 +95,6 @@ export function UserCenterPage() {
   const phoneCaptchaManagerRef = useRef<CaptchaManager | null>(null);
   const passwordCaptchaManagerRef = useRef<CaptchaManager | null>(null);
   const captchaEnabled = isCaptchaEnabled();
-  const securityApiEnabled = isSecurityApiEnabled();
 
   // 初始化 Captcha
   useEffect(() => {
@@ -250,16 +245,10 @@ export function UserCenterPage() {
   };
 
   // 验证当前密码（仅用于验证对话框）
-  // 使用后端安全 API 代理进行验证码验证 + 密码验证
+  // 直接调用 Logto Account API 进行密码验证，ESA 验证码作为前端人机验证门槛
   const handleVerifyPasswordForAction = async () => {
     if (!accountService || !currentPassword) {
       MessagePlugin.warning('请输入当前密码');
-      return;
-    }
-
-    // 检查后端安全 API 是否可用
-    if (!securityApiEnabled) {
-      MessagePlugin.error('安全服务未配置，无法进行身份验证');
       return;
     }
 
@@ -267,27 +256,20 @@ export function UserCenterPage() {
     setCaptchaVerifying(true);
 
     try {
-      // 1. 实时获取最新的 access token（避免使用缓存的过期 token）
-      // 必须指定 resource 才能获取有效的 access token
-      const resource = import.meta.env.VITE_API_BASE || 'https://api.dailys.zone';
-      const accessToken = await getAccessToken(resource);
-      
-      if (!accessToken) {
-        MessagePlugin.error('无法获取访问令牌，请重新登录');
-        return;
-      }
-
-      // 2. 触发验证码验证获取 captchaVerifyParam
-      let captchaVerifyParam: string | null = null;
+      // 1. 如果启用了验证码，先进行人机验证（ESA 网关自动验签）
       if (captchaEnabled && passwordCaptchaManagerRef.current) {
         // 检查验证码是否已初始化（在对话框打开时由 useEffect 初始化）
         if (!passwordCaptchaManagerRef.current.isInitialized()) {
           MessagePlugin.error('验证码初始化中，请稍后重试');
           return;
         }
-        captchaVerifyParam = await passwordCaptchaManagerRef.current.triggerVerification();
-        if (!captchaVerifyParam) {
-          MessagePlugin.error('人机验证失败，请重试');
+        try {
+          await passwordCaptchaManagerRef.current.triggerVerification();
+        } catch (error) {
+          // 用户取消验证不显示错误
+          if (error instanceof Error && error.message !== '用户取消验证') {
+            MessagePlugin.error('人机验证失败，请重试');
+          }
           return;
         }
       } else if (captchaEnabled) {
@@ -295,20 +277,12 @@ export function UserCenterPage() {
         return;
       }
 
-      // 3. 调用后端 API 进行密码验证
-      const result = await verifyPasswordWithCaptcha(
-        captchaVerifyParam || '',
-        currentPassword,
-        accessToken
-      );
+      setCaptchaVerifying(false);
 
-      if (!result) {
-        // 验证失败（错误已在 hook 中处理并显示）
-        return;
-      }
+      // 2. 直接调用 Logto Account API 进行密码验证
+      const result = await accountService.verifyPassword(currentPassword);
 
-      // 后端返回的是 snake_case，需要转换
-      setVerificationRecordId(result.verification_record_id);
+      setVerificationRecordId(result.verificationRecordId);
       MessagePlugin.success('身份验证成功');
       
       // 关闭验证对话框
@@ -327,6 +301,7 @@ export function UserCenterPage() {
       MessagePlugin.error(error instanceof Error ? error.message : '身份验证失败，请检查当前密码是否正确');
     } finally {
       setVerifying(false);
+      setCaptchaVerifying(false);
     }
   };
 

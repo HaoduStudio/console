@@ -108,11 +108,10 @@ export class AccountApiService {
   }
 
   /**
-   * @deprecated 密码验证现在通过后端安全 API 代理进行，请使用 SecurityApiService.verifyPassword()
-   * 直接调用此方法将不会通过验证码验证
+   * 验证密码，获取 verificationRecordId
+   * 用于敏感操作前的身份验证
    */
   async verifyPassword(password: string): Promise<VerificationRecordResponse> {
-    console.warn('AccountApiService.verifyPassword() 已弃用，请使用 SecurityApiService.verifyPassword() 通过后端代理验证');
     return this.request<VerificationRecordResponse>('/verifications/password', {
       method: 'POST',
       body: JSON.stringify({ password }),
