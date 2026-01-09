@@ -142,6 +142,9 @@ export async function verifyPasswordWithCaptcha(
 
   return securityRequest<VerifyPasswordResponse>('/v1/security/verify_password', {
     method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    },
     body: JSON.stringify(body),
   });
 }

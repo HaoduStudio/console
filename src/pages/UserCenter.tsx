@@ -128,6 +128,31 @@ export function UserCenterPage() {
     initCaptcha();
   }, [captchaEnabled]);
 
+  // 当密码验证对话框打开时，初始化验证码（确保 DOM 元素已渲染）
+  useEffect(() => {
+    if (!verifyPasswordDialogVisible || !captchaEnabled || !passwordCaptchaManagerRef.current) {
+      return;
+    }
+
+    const initPasswordCaptcha = async () => {
+      try {
+        // 等待 DOM 元素渲染完成
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        if (!passwordCaptchaManagerRef.current?.isInitialized()) {
+          await passwordCaptchaManagerRef.current?.initialize(
+            '#password-captcha-element',
+            '#password-captcha-trigger-btn'
+          );
+        }
+      } catch (error) {
+        console.error('密码验证码初始化失败:', error);
+      }
+    };
+
+    initPasswordCaptcha();
+  }, [verifyPasswordDialogVisible, captchaEnabled]);
+
   // 初始化 Account API 服务
   const initAccountService = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -255,12 +280,10 @@ export function UserCenterPage() {
       // 2. 触发验证码验证获取 captchaVerifyParam
       let captchaVerifyParam: string | null = null;
       if (captchaEnabled && passwordCaptchaManagerRef.current) {
-        // 确保 CaptchaManager 已初始化
+        // 检查验证码是否已初始化（在对话框打开时由 useEffect 初始化）
         if (!passwordCaptchaManagerRef.current.isInitialized()) {
-          await passwordCaptchaManagerRef.current.initialize(
-            'verify-password-captcha-element',
-            'verify-password-btn'
-          );
+          MessagePlugin.error('验证码初始化中，请稍后重试');
+          return;
         }
         captchaVerifyParam = await passwordCaptchaManagerRef.current.triggerVerification();
         if (!captchaVerifyParam) {
