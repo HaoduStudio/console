@@ -47,9 +47,17 @@ export class AccountApiService {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    queryParams?: Record<string, string>
   ): Promise<T> {
-    const url = `${this.apiBase}${endpoint}`;
+    let url = `${this.apiBase}${endpoint}`;
+    
+    // 添加查询参数（用于 ESA 验签等场景）
+    if (queryParams && Object.keys(queryParams).length > 0) {
+      const searchParams = new URLSearchParams(queryParams);
+      url = `${url}?${searchParams.toString()}`;
+    }
+    
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -110,12 +118,32 @@ export class AccountApiService {
   /**
    * 验证密码，获取 verificationRecordId
    * 用于敏感操作前的身份验证
+   * @param password 当前密码
+   * @param captchaVerifyParam ESA 验证码验签参数（可选，开启验证码时必传）
    */
-  async verifyPassword(password: string): Promise<VerificationRecordResponse> {
-    return this.request<VerificationRecordResponse>('/verifications/password', {
-      method: 'POST',
-      body: JSON.stringify({ password }),
-    });
+  async verifyPassword(
+    password: string,
+    captchaVerifyParam?: string
+  ): Promise<VerificationRecordResponse> {
+    // 构建 ESA 验签的查询参数和 Header
+    const queryParams: Record<string, string> = {};
+    const headers: Record<string, string> = {};
+    
+    if (captchaVerifyParam) {
+      // ESA 验签需要同时通过 URI 参数和 Header 传递
+      queryParams['captcha_verify_param'] = captchaVerifyParam;
+      headers['captcha-Verify-param'] = captchaVerifyParam;
+    }
+    
+    return this.request<VerificationRecordResponse>(
+      '/verifications/password',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ password }),
+      },
+      queryParams
+    );
   }
 
   async sendVerificationCode(

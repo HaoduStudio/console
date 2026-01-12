@@ -245,7 +245,7 @@ export function UserCenterPage() {
   };
 
   // 验证当前密码（仅用于验证对话框）
-  // 直接调用 Logto Account API 进行密码验证，ESA 验证码作为前端人机验证门槛
+  // 直接调用 Logto Account API 进行密码验证，ESA 验证码用于 ESA 网关验签
   const handleVerifyPasswordForAction = async () => {
     if (!accountService || !currentPassword) {
       MessagePlugin.warning('请输入当前密码');
@@ -255,8 +255,10 @@ export function UserCenterPage() {
     setVerifying(true);
     setCaptchaVerifying(true);
 
+    let captchaVerifyParam: string | undefined;
+
     try {
-      // 1. 如果启用了验证码，先进行人机验证（ESA 网关自动验签）
+      // 1. 如果启用了验证码，先进行人机验证，获取验签参数
       if (captchaEnabled && passwordCaptchaManagerRef.current) {
         // 检查验证码是否已初始化（在对话框打开时由 useEffect 初始化）
         if (!passwordCaptchaManagerRef.current.isInitialized()) {
@@ -264,7 +266,8 @@ export function UserCenterPage() {
           return;
         }
         try {
-          await passwordCaptchaManagerRef.current.triggerVerification();
+          // 获取验签参数，用于传递给 ESA 网关进行验签
+          captchaVerifyParam = await passwordCaptchaManagerRef.current.triggerVerification();
         } catch (error) {
           // 用户取消验证不显示错误
           if (error instanceof Error && error.message !== '用户取消验证') {
@@ -279,8 +282,8 @@ export function UserCenterPage() {
 
       setCaptchaVerifying(false);
 
-      // 2. 直接调用 Logto Account API 进行密码验证
-      const result = await accountService.verifyPassword(currentPassword);
+      // 2. 调用 Logto Account API 进行密码验证，同时传递验签参数给 ESA 网关
+      const result = await accountService.verifyPassword(currentPassword, captchaVerifyParam);
 
       setVerificationRecordId(result.verificationRecordId);
       MessagePlugin.success('身份验证成功');

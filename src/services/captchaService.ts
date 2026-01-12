@@ -46,6 +46,7 @@ export const ESA_VERIFY_CODES = {
   T001: '验证通过',
   F003: 'CaptchaVerifyParam 解析错误',
   F005: '场景 ID（SceneId）不存在',
+  F008: '验证码业务验证失败（已过期或内部错误）',
   F017: 'VerifyToken 内容被修改',
   F018: '验签数据重复使用',
   F019: '验签超出时间限制（有效期 90 秒）或未发起验证就验签',
@@ -198,8 +199,23 @@ export class CaptchaManager {
         },
         fail: (result: unknown) => {
           console.error('ESA Captcha verification failed:', result);
+          // 清除已保存的验证码参数
+          this.lastCaptchaVerifyParam = null;
+          // 验证失败后刷新验证码，以便用户可以重新验证
+          if (this.captchaInstance) {
+            this.captchaInstance.refresh();
+          }
           if (this.pendingReject) {
-            this.pendingReject(new Error('验证失败，请重试'));
+            // 根据结果提供更详细的错误信息
+            const failResult = result as { verifyCode?: string; success?: boolean; verifyResult?: boolean };
+            let errorMessage = '验证失败，请重试';
+            if (failResult?.verifyCode) {
+              const codeMessage = ESA_VERIFY_CODES[failResult.verifyCode as keyof typeof ESA_VERIFY_CODES];
+              if (codeMessage) {
+                errorMessage = codeMessage;
+              }
+            }
+            this.pendingReject(new Error(errorMessage));
             this.pendingResolve = null;
             this.pendingReject = null;
           }
