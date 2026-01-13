@@ -191,6 +191,48 @@
   margin-bottom: 8px;
 }
 
+.upload-form-item .t-upload {
+  width: 100%;
+  display: block;
+}
+
+.upload-form-item .t-upload__trigger {
+  width: 100%;
+}
+
+.upload-form-item .t-upload .t-button {
+  width: 100%;
+  justify-content: center;
+}
+
+.upload-form-item .t-upload__card-container {
+  width: 100% !important;
+}
+
+.upload-form-item .t-upload__dragger {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.upload-form-item .t-upload__dragger-wrapper {
+  width: 100% !important;
+}
+
+/* 底部操作按钮区域撑满 */
+.upload-form-item .t-upload__flow-op {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 文件列表区域 */
+.upload-form-item .t-upload__flow {
+  width: 100%;
+}
+
+.upload-form-item .t-upload__flow-card-area {
+  width: 100%;
+}
+
 .upload-form-item.checkbox-item {
   margin-top: 16px;
 }
