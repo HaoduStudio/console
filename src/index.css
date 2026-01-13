@@ -29,3 +29,56 @@ body {
   min-height: 100vh;
 }
 
+@media (max-width: 768px) {
+  .t-dialog {
+    width: calc(100vw - 32px) !important;
+    max-width: 100% !important;
+    margin: 16px !important;
+  }
+
+  .t-dialog__body {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .t-dialog .t-form__label {
+    width: auto !important;
+    min-width: 80px;
+  }
+
+  .t-dialog .t-form__controls {
+    margin-left: 0 !important;
+  }
+
+  .t-dialog .t-form__item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .t-dialog .t-form__label {
+    text-align: left !important;
+    padding-right: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .t-dialog {
+    width: calc(100vw - 24px) !important;
+    margin: 12px !important;
+  }
+
+  .t-dialog__header {
+    padding: 16px 16px 12px !important;
+  }
+
+  .t-dialog__body {
+    padding: 0 16px 16px !important;
+    max-height: 55vh;
+  }
+
+  .t-dialog__footer {
+    padding: 12px 16px 16px !important;
+  }
+}
+

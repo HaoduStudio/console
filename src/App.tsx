@@ -7,6 +7,8 @@ import { SignInPage } from './pages/SignIn';
 import { CallbackPage } from './pages/Callback';
 import { HomePage } from './pages/Home';
 import { UserCenterPage } from './pages/UserCenter';
+import { ResourceMarketPage } from './pages/ResourceMarket';
+import { MyResourcesPage } from './pages/MyResources';
 import { MainLayout } from './layouts/MainLayout';
 
 import 'tdesign-react/es/style/index.css';
@@ -51,6 +53,26 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <UserCenterPage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resource/market"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <ResourceMarketPage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resource/my"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <MyResourcesPage />
                 </MainLayout>
               </ProtectedRoute>
             }
