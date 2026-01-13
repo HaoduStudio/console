@@ -462,7 +462,7 @@ export function MyResourcesPage() {
               max={10}
               sizeLimit={{ size: 10, unit: 'MB', message: '文件大小不能超过 10MB' }}
               tips="支持 PNG、JPG、GIF、WebP、SVG 格式，单个文件不超过 10MB，最多上传 10 个文件"
-              requestMethod={() => Promise.resolve({ status: 'success' })}
+              requestMethod={() => Promise.resolve({ status: 'success', response: {} })}
             />
           </div>
 
