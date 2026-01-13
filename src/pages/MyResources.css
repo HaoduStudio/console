@@ -85,7 +85,7 @@
   cursor: pointer;
 }
 
-.resource-image-wrapper .t-image {
+.resource-image-wrapper .t-image__wrapper {
   position: absolute;
   top: 0;
   left: 0;
@@ -93,7 +93,13 @@
   height: 100%;
 }
 
-.resource-image-wrapper .t-image__img {
+.resource-image-wrapper .t-image__wrapper picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.resource-image-wrapper .t-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -103,9 +109,13 @@
   position: absolute;
   top: 8px;
   right: 8px;
+  z-index: 1;
 }
 
 .image-error {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   align-items: center;
   justify-content: center;

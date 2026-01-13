@@ -339,18 +339,25 @@ export function MyResourcesPage() {
                   hoverShadow
                 >
                   <div className="resource-image-wrapper" onClick={() => handleImageClick(resource)}>
-                    <Image
-                      src={resource.url}
-                      fit="cover"
-                      position="center"
-                      lazy
-                      loading={<Loading size="small" />}
-                      error={
-                        <div className="image-error">
-                          加载失败
-                        </div>
-                      }
-                    />
+                    {resource.url ? (
+                      <Image
+                        src={resource.url}
+                        fit="cover"
+                        position="center"
+                        lazy
+                        style={{ width: '100%', height: '100%' }}
+                        loading={<Loading size="small" />}
+                        error={
+                          <div className="image-error">
+                            加载失败
+                          </div>
+                        }
+                      />
+                    ) : (
+                      <div className="image-error">
+                        暂无图片
+                      </div>
+                    )}
                     <div className="resource-status-badge">
                       <Tag
                         size="small"
@@ -455,6 +462,7 @@ export function MyResourcesPage() {
               max={10}
               sizeLimit={{ size: 10, unit: 'MB', message: '文件大小不能超过 10MB' }}
               tips="支持 PNG、JPG、GIF、WebP、SVG 格式，单个文件不超过 10MB，最多上传 10 个文件"
+              requestMethod={() => Promise.resolve({ status: 'success' })}
             />
           </div>
 

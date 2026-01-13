@@ -123,18 +123,25 @@ export function ResourceMarketPage() {
                   hoverShadow
                 >
                   <div className="resource-image-wrapper" onClick={() => handleImageClick(resource)}>
-                    <Image
-                      src={resource.url}
-                      fit="cover"
-                      position="center"
-                      lazy
-                      loading={<Loading size="small" />}
-                      error={
-                        <div className="image-error">
-                          加载失败
-                        </div>
-                      }
-                    />
+                    {resource.url ? (
+                      <Image
+                        src={resource.url}
+                        fit="cover"
+                        position="center"
+                        lazy
+                        style={{ width: '100%', height: '100%' }}
+                        loading={<Loading size="small" />}
+                        error={
+                          <div className="image-error">
+                            加载失败
+                          </div>
+                        }
+                      />
+                    ) : (
+                      <div className="image-error">
+                        暂无图片
+                      </div>
+                    )}
                   </div>
                   <div className="resource-info">
                     <div className="resource-filename" title={resource.filename}>
