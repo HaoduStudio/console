@@ -44,6 +44,7 @@ interface ESACaptchaOptions {
 // ESA 验证码响应码
 export const ESA_VERIFY_CODES = {
   T001: '验证通过',
+  F001: '验证码未完成验证',
   F003: 'CaptchaVerifyParam 解析错误',
   F005: '场景 ID（SceneId）不存在',
   F008: '验证码业务验证失败（已过期或内部错误）',
@@ -134,6 +135,10 @@ export class CaptchaManager {
   private captchaInstance: CaptchaInstance | null = null;
   /** 最后一次成功的验证码参数 */
   private lastCaptchaVerifyParam: string | null = null;
+  /** 最后一次验证成功的时间戳 */
+  private lastVerificationTime = 0;
+  /** 验证码参数有效期（毫秒），ESA 验签有效期为 90 秒，这里设置为 80 秒以留出余量 */
+  private static readonly CAPTCHA_PARAM_TTL = 80 * 1000;
 
   constructor() {
     this.config = getCaptchaConfig();
@@ -152,6 +157,17 @@ export class CaptchaManager {
    */
   clearLastCaptchaVerifyParam(): void {
     this.lastCaptchaVerifyParam = null;
+    this.lastVerificationTime = 0;
+  }
+
+  /**
+   * 检查验证码参数是否仍在有效期内
+   */
+  isCaptchaParamValid(): boolean {
+    if (!this.lastCaptchaVerifyParam || !this.lastVerificationTime) {
+      return false;
+    }
+    return Date.now() - this.lastVerificationTime < CaptchaManager.CAPTCHA_PARAM_TTL;
   }
 
   isInitialized(): boolean {
@@ -189,8 +205,9 @@ export class CaptchaManager {
         // ESA 专用服务域名
         server: ['captcha-esa-open.aliyuncs.com', 'captcha-esa-open-b.aliyuncs.com'],
         success: (captchaVerifyParam: string) => {
-          // 保存验证码参数，用于后续请求携带
+          // 保存验证码参数和验证时间，用于后续请求携带
           this.lastCaptchaVerifyParam = captchaVerifyParam;
+          this.lastVerificationTime = Date.now();
           if (this.pendingResolve) {
             this.pendingResolve(captchaVerifyParam);
             this.pendingResolve = null;
@@ -198,16 +215,26 @@ export class CaptchaManager {
           }
         },
         fail: (result: unknown) => {
+          const failResult = result as { verifyCode?: string; success?: boolean; verifyResult?: boolean };
           console.error('ESA Captcha verification failed:', result);
-          // 清除已保存的验证码参数
+          
+          // F001 表示验证码未完成验证（用户还没滑动）
+          // 这种情况通常发生在 refresh() 后 SDK 内部状态检查时
+          // 不应该 reject Promise，让用户继续完成验证
+          if (failResult?.verifyCode === 'F001') {
+            console.log('Captcha not yet completed, waiting for user verification...');
+            return;
+          }
+          
+          // 清除已保存的验证码参数和时间
           this.lastCaptchaVerifyParam = null;
+          this.lastVerificationTime = 0;
           // 验证失败后刷新验证码，以便用户可以重新验证
           if (this.captchaInstance) {
             this.captchaInstance.refresh();
           }
           if (this.pendingReject) {
             // 根据结果提供更详细的错误信息
-            const failResult = result as { verifyCode?: string; success?: boolean; verifyResult?: boolean };
             let errorMessage = '验证失败，请重试';
             if (failResult?.verifyCode) {
               const codeMessage = ESA_VERIFY_CODES[failResult.verifyCode as keyof typeof ESA_VERIFY_CODES];
@@ -257,9 +284,10 @@ export class CaptchaManager {
 
   /**
    * 触发验证码验证
+   * @param forceRefresh 是否强制刷新验证码（默认 true，每次都获取新验证）
    * @returns 验证成功返回 captchaVerifyParam，用于携带在请求中
    */
-  async triggerVerification(): Promise<string> {
+  async triggerVerification(forceRefresh = true): Promise<string> {
     if (!isCaptchaEnabled()) {
       return '';
     }
@@ -273,6 +301,16 @@ export class CaptchaManager {
       await new Promise((r) => setTimeout(r, 2000 - elapsed));
     }
 
+    // 强制刷新验证码，确保每次都重新验证
+    // 这解决了验证码 SDK 在已验证状态下不触发 success 回调的问题
+    if (forceRefresh && this.captchaInstance) {
+      this.lastCaptchaVerifyParam = null;
+      this.lastVerificationTime = 0;
+      this.captchaInstance.refresh();
+      // 等待 SDK 内部 DOM 操作完成，避免 Range.setStart 错误
+      await new Promise((r) => setTimeout(r, 100));
+    }
+
     return new Promise((resolve, reject) => {
       this.pendingResolve = resolve;
       this.pendingReject = reject;
@@ -282,6 +320,9 @@ export class CaptchaManager {
         reject(new Error('Captcha trigger element not found'));
         return;
       }
+      
+      // 点击触发按钮，让 SDK 弹出验证窗口
+      // 注意：refresh() 只是重置状态，需要点击才能弹出新的验证窗口
       (trigger as HTMLElement).click();
     });
   }
