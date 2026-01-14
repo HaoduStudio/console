@@ -31,6 +31,7 @@ export interface UserAnnouncement {
   require_confirm: boolean;
   priority: number;
   created_at: string;
+  is_read?: boolean;
 }
 
 export interface UnreadAnnouncementsResponse {

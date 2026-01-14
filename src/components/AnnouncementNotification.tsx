@@ -87,23 +87,25 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
     initService();
   }, [getAccessToken, isAuthenticated]);
 
-  // 加载未读公告
-  const loadUnreadAnnouncements = useCallback(async () => {
+  // 加载所有公告（首次加载）
+  const loadAnnouncements = useCallback(async (triggerPopup: boolean = true) => {
     if (!service) return;
 
     try {
       setLoading(true);
-      const response: UnreadAnnouncementsResponse = await service.getUnreadAnnouncements();
+      const response: UnreadAnnouncementsResponse = await service.getActiveAnnouncements();
       
       setAnnouncements(response.items);
-      setUnreadCount(response.total);
-      onAnnouncementCheck?.(response.total > 0);
+      // 计算未读数量
+      const unread = response.items.filter(item => !item.is_read).length;
+      setUnreadCount(unread);
+      onAnnouncementCheck?.(unread > 0);
 
-      // 处理需要弹窗的公告
-      if (response.has_popup) {
-        const popups = response.items.filter(a => a.is_popup);
-        if (popups.length > 0) {
-          setPopupAnnouncements(popups);
+      // 只在首次加载时处理弹窗公告，避免循环弹窗
+      if (triggerPopup) {
+        const unreadPopups = response.items.filter(item => !item.is_read && item.is_popup);
+        if (unreadPopups.length > 0) {
+          setPopupAnnouncements(unreadPopups);
           setCurrentPopupIndex(0);
           setShowAnnouncementDialog(true);
         }
@@ -118,9 +120,9 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
   // 服务初始化后加载公告
   useEffect(() => {
     if (service) {
-      loadUnreadAnnouncements();
+      loadAnnouncements(true);
     }
-  }, [service, loadUnreadAnnouncements]);
+  }, [service, loadAnnouncements]);
 
   // 标记公告已读
   const markAsRead = async (announcement: UserAnnouncement, confirmed: boolean = false) => {
@@ -128,8 +130,14 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
 
     try {
       await service.markAsRead(announcement.id, confirmed);
-      // 重新加载未读公告
-      await loadUnreadAnnouncements();
+      // 直接更新本地状态，将该公告标记为已读
+      setAnnouncements(prev => 
+        prev.map(item => 
+          item.id === announcement.id ? { ...item, is_read: true } : item
+        )
+      );
+      // 重新计算未读数量
+      setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('标记已读失败:', error);
       MessagePlugin.error('操作失败');
@@ -202,9 +210,10 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
           <div className="announcement-popup">
             <div className="announcement-popup-header">
               <span className="popup-title">公告通知</span>
-              {unreadCount > 0 && (
-                <span className="unread-count">{unreadCount} 条未读</span>
-              )}
+              <span className="unread-count">
+                {announcements.length > 0 && `共 ${announcements.length} 条`}
+                {unreadCount > 0 && ` / ${unreadCount} 条未读`}
+              </span>
             </div>
             <div className="announcement-popup-content">
               {loading ? (
@@ -219,6 +228,7 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
                     <div
                       key={item.id}
                       className="announcement-item"
+                      data-read={item.is_read}
                       onClick={() => handleViewDetail(item)}
                     >
                       <div className="announcement-item-content">
@@ -227,6 +237,15 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
                           {item.require_confirm && (
                             <Tag size="small" theme="warning" variant="outline">
                               需确认
+                            </Tag>
+                          )}
+                          {item.is_read ? (
+                            <Tag size="small" theme="default" variant="outline">
+                              已读
+                            </Tag>
+                          ) : (
+                            <Tag size="small" theme="primary" variant="light-outline">
+                              未读
                             </Tag>
                           )}
                         </div>

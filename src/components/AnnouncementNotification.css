@@ -52,6 +52,14 @@
   background-color: var(--td-bg-color-container-hover);
 }
 
+.announcement-item[data-read="true"] {
+  opacity: 0.7;
+}
+
+.announcement-item[data-read="true"] .announcement-item-title {
+  color: var(--td-text-color-secondary);
+}
+
 .announcement-item:last-child {
   border-bottom: none;
 }
