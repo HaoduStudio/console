@@ -27,6 +27,15 @@ export const logtoConfig: LogtoConfig = {
   ],
 };
 
+// 获取 API Resource 标识符（用于获取 Access Token）
+export const getApiResource = (): string | undefined => {
+  const resources = import.meta.env.VITE_LOGTO_RESOURCES;
+  if (!resources || resources.trim() === '') {
+    return undefined;
+  }
+  return resources.split(',')[0]?.trim();
+};
+
 // 获取 Logto API 地址
 export const getLogtoApiBase = (): string => {
   const endpoint = import.meta.env.VITE_LOGTO_ENDPOINT || 'https://your-logto-instance.com';

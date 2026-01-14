@@ -9,7 +9,12 @@ import { HomePage } from './pages/Home';
 import { UserCenterPage } from './pages/UserCenter';
 import { ResourceMarketPage } from './pages/ResourceMarket';
 import { MyResourcesPage } from './pages/MyResources';
+import { AdminDashboard } from './pages/AdminDashboard';
+import { UserManagement } from './pages/UserManagement';
+import { ResourceManagement } from './pages/ResourceManagement';
+import { AnnouncementManagement } from './pages/AnnouncementManagement';
 import { MainLayout } from './layouts/MainLayout';
+import { AdminLayout } from './layouts/AdminLayout';
 
 import 'tdesign-react/es/style/index.css';
 
@@ -77,6 +82,49 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
+          {/* 管理员路由 */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <AdminDashboard />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <UserManagement />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/resources"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ResourceManagement />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/announcements"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <AnnouncementManagement />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          
           <Route
             path="*"
             element={

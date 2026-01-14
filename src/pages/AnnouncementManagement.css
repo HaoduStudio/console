@@ -1,0 +1,103 @@
+.announcement-management {
+  padding: 24px;
+}
+
+.announcement-management :deep(.t-card__body) {
+  padding: 20px;
+}
+
+.toolbar {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolbar :deep(.t-button) {
+  height: 36px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #999999;
+  font-size: 14px;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 统计弹窗 */
+.stats-content {
+  padding: 16px 0;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 14px;
+}
+
+.stat-value {
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* 表格样式 */
+:deep(.t-table) {
+  margin-top: 0;
+}
+
+:deep(.t-table__body-tr:hover) {
+  background-color: #f5f7fa;
+}
+
+/* 对话框样式 */
+:deep(.t-dialog) {
+  width: 100%;
+}
+
+:deep(.t-dialog__body) {
+  padding: 20px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .announcement-management {
+    padding: 16px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toolbar :deep(.t-button) {
+    width: 100%;
+  }
+}

@@ -1,0 +1,67 @@
+.admin-dashboard {
+  padding: 24px;
+}
+
+.admin-dashboard h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #0052cc;
+  margin-bottom: 24px;
+}
+
+.stats-card {
+  margin-bottom: 24px;
+}
+
+.stats-card :deep(.t-card__body) {
+  padding: 20px;
+}
+
+.quick-actions-card {
+  background: linear-gradient(135deg, #f0f5ff 0%, #f9faff 100%);
+}
+
+.quick-actions-card :deep(.t-card__title) {
+  color: #0052cc;
+}
+
+.quick-actions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.quick-actions-list li {
+  padding: 12px 0;
+  color: #575d6c;
+  font-size: 14px;
+  line-height: 1.6;
+  border-bottom: 1px solid #f0f5ff;
+}
+
+.quick-actions-list li:last-child {
+  border-bottom: none;
+}
+
+.dashboard-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding: 16px;
+  }
+
+  .admin-dashboard h1 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .stats-card {
+    margin-bottom: 16px;
+  }
+}

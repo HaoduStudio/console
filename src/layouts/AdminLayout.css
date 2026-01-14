@@ -1,0 +1,92 @@
+.admin-layout {
+  min-height: 100vh;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  background: var(--td-bg-color-container);
+  border-bottom: 1px solid var(--td-component-stroke);
+  height: 64px;
+}
+
+.admin-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-header .header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-header .app-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--td-text-color-primary);
+}
+
+.admin-header .menu-toggle-btn {
+  flex-shrink: 0;
+}
+
+.admin-header .menu-toggle-btn .t-icon {
+  font-size: 24px;
+}
+
+.admin-body {
+  min-height: calc(100vh - 64px);
+}
+
+/* 侧边栏样式 */
+.admin-aside {
+  transition: width 0.2s ease;
+  background: var(--td-bg-color-container);
+  border-right: 1px solid var(--td-component-stroke);
+  overflow: hidden;
+}
+
+.admin-content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--td-bg-color-page);
+}
+
+/* 菜单样式 - 使用TDesign CSS变量 */
+.admin-aside :deep(.t-menu) {
+  background: var(--td-bg-color-container);
+}
+
+.admin-aside :deep(.t-menu__item) {
+  color: var(--td-text-color-primary);
+}
+
+.admin-aside :deep(.t-menu__item:hover) {
+  background: var(--td-bg-color-container-hover);
+}
+
+.admin-aside :deep(.t-menu__item.t-is-active) {
+  color: var(--td-brand-color);
+  background: var(--td-brand-color-light);
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .admin-header {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 0 12px;
+  }
+
+  .admin-header .app-title {
+    font-size: 16px;
+  }
+}

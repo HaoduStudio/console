@@ -269,4 +269,116 @@ export class CloudResourceApiService {
 
     return response.json();
   }
+
+  async getPendingResources(params?: {
+    category?: ResourceCategory;
+    limit?: number;
+    offset?: number;
+  }): Promise<PaginatedResponse<CloudResource>> {
+    const searchParams = new URLSearchParams();
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.offset) searchParams.append('offset', params.offset.toString());
+
+    const queryString = searchParams.toString();
+    const endpoint = `/admin/cloud-resource/pending${queryString ? `?${queryString}` : ''}`;
+    
+    return this.request<PaginatedResponse<CloudResource>>(endpoint);
+  }
+
+  async getAllResources(params?: {
+    category?: ResourceCategory;
+    status?: ResourceStatus;
+    user_id?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<PaginatedResponse<CloudResource>> {
+    const searchParams = new URLSearchParams();
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.status) searchParams.append('status', params.status);
+    if (params?.user_id) searchParams.append('user_id', params.user_id);
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.offset) searchParams.append('offset', params.offset.toString());
+
+    const queryString = searchParams.toString();
+    const endpoint = `/admin/cloud-resource/all${queryString ? `?${queryString}` : ''}`;
+    
+    return this.request<PaginatedResponse<CloudResource>>(endpoint);
+  }
+
+  async getResourceStats(category?: ResourceCategory): Promise<CloudResourceStats> {
+    const query = category ? `?category=${category}` : '';
+    return this.request<CloudResourceStats>(
+      `/admin/cloud-resource/stats${query}`
+    );
+  }
+
+  async getResource(resourceId: number): Promise<CloudResource> {
+    return this.request<CloudResource>(
+      `/admin/cloud-resource/${resourceId}`
+    );
+  }
+
+  async approveResource(resourceId: number): Promise<{
+    id: number;
+    status: string;
+    reviewed_by: string;
+    reviewed_at: string;
+    message: string;
+  }> {
+    return this.request<{
+      id: number;
+      status: string;
+      reviewed_by: string;
+      reviewed_at: string;
+      message: string;
+    }>(`/admin/cloud-resource/${resourceId}/approve`, {
+      method: 'POST',
+    });
+  }
+
+  async rejectResource(
+    resourceId: number,
+    reason: string
+  ): Promise<{
+    id: number;
+    status: string;
+    reviewed_by: string;
+    reviewed_at: string;
+    message: string;
+  }> {
+    return this.request<{
+      id: number;
+      status: string;
+      reviewed_by: string;
+      reviewed_at: string;
+      message: string;
+    }>(`/admin/cloud-resource/${resourceId}/reject`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async adminDeleteResource(resourceId: number): Promise<{
+    success: boolean;
+    id: number;
+  }> {
+    return this.request<{
+      success: boolean;
+      id: number;
+    }>(`/admin/cloud-resource/${resourceId}`, {
+      method: 'DELETE',
+    });
+  }
+}
+
+// 资源统计信息接口
+export interface CloudResourceStats {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
 }
