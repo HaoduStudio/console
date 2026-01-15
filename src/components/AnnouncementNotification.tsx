@@ -52,7 +52,7 @@ interface AnnouncementNotificationProps {
   onAnnouncementCheck?: (hasUnread: boolean) => void;
 }
 
-const shownPopupAnnouncementIds = new Set<string>();
+const shownPopupAnnouncementIds = new Set<number>();
 
 export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNotificationProps) => {
   const { getAccessToken, isAuthenticated } = useLogto();
