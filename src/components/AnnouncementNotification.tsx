@@ -52,6 +52,8 @@ interface AnnouncementNotificationProps {
   onAnnouncementCheck?: (hasUnread: boolean) => void;
 }
 
+const shownPopupAnnouncementIds = new Set<string>();
+
 export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNotificationProps) => {
   const { getAccessToken, isAuthenticated } = useLogto();
   const [popupVisible, setPopupVisible] = useState(false);
@@ -68,6 +70,9 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
   // 详情弹窗
   const [detailDialogVisible, setDetailDialogVisible] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<UserAnnouncement | null>(null);
+  
+  // 标记是否已经初始化加载过弹窗公告
+  const [hasInitializedPopups, setHasInitializedPopups] = useState(false);
 
   // 初始化服务
   useEffect(() => {
@@ -101,21 +106,26 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
       setUnreadCount(unread);
       onAnnouncementCheck?.(unread > 0);
 
-      // 只在首次加载时处理弹窗公告，避免循环弹窗
-      if (triggerPopup) {
-        const unreadPopups = response.items.filter(item => !item.is_read && item.is_popup);
+      if (triggerPopup && !hasInitializedPopups) {
+        const unreadPopups = response.items.filter(item => 
+          !item.is_read && 
+          item.is_popup && 
+          !shownPopupAnnouncementIds.has(item.id)
+        );
         if (unreadPopups.length > 0) {
+          unreadPopups.forEach(item => shownPopupAnnouncementIds.add(item.id));
           setPopupAnnouncements(unreadPopups);
           setCurrentPopupIndex(0);
           setShowAnnouncementDialog(true);
         }
+        setHasInitializedPopups(true);
       }
     } catch (error) {
       console.error('加载公告失败:', error);
     } finally {
       setLoading(false);
     }
-  }, [service, onAnnouncementCheck]);
+  }, [service, onAnnouncementCheck, hasInitializedPopups]);
 
   // 服务初始化后加载公告
   useEffect(() => {
@@ -135,6 +145,16 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
         prev.map(item => 
           item.id === announcement.id ? { ...item, is_read: true } : item
         )
+      );
+      // 同步更新弹窗公告列表的已读状态
+      setPopupAnnouncements(prev =>
+        prev.map(item =>
+          item.id === announcement.id ? { ...item, is_read: true } : item
+        )
+      );
+      // 同步更新选中的公告状态
+      setSelectedAnnouncement(prev =>
+        prev && prev.id === announcement.id ? { ...prev, is_read: true } : prev
       );
       // 重新计算未读数量
       setUnreadCount(prev => Math.max(0, prev - 1));
@@ -351,13 +371,15 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
             <Button variant="outline" onClick={() => setDetailDialogVisible(false)}>
               关闭
             </Button>
-            <Button
-              theme="primary"
-              icon={<CheckCircleIcon />}
-              onClick={handleMarkReadInDetail}
-            >
-              {selectedAnnouncement?.require_confirm ? '确认已读' : '标记已读'}
-            </Button>
+            {selectedAnnouncement && !selectedAnnouncement.is_read && (
+              <Button
+                theme="primary"
+                icon={<CheckCircleIcon />}
+                onClick={handleMarkReadInDetail}
+              >
+                {selectedAnnouncement.require_confirm ? '确认已读' : '标记已读'}
+              </Button>
+            )}
           </div>
         }
         onClose={() => setDetailDialogVisible(false)}
