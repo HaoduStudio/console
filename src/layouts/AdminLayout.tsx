@@ -149,7 +149,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             onClick={handleUserMenuClick}
             options={[
               { content: username, value: 'username', disabled: true },
-              { content: '返回用户版', value: 'switch-user', prefixIcon: <HomeIcon /> },
+              { content: '用户面板', value: 'switch-user', prefixIcon: <HomeIcon /> },
               { content: '用户中心', value: 'user-center', prefixIcon: <UserIcon /> },
               { content: '退出登录', value: 'logout', prefixIcon: <LogoutIcon />, theme: 'error' },
             ]}
