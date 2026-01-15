@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Button, Dialog, Select, MessagePlugin, Space, Pagination, Loading, Tag, Textarea, DialogPlugin } from 'tdesign-react';
-import { CheckCircleFilledIcon, CloseCircleFilledIcon, DeleteIcon } from 'tdesign-icons-react';
+import { Table, Card, Button, Dialog, Select, MessagePlugin, Space, Pagination, Loading, Tag, Textarea, DialogPlugin, Tooltip, Image } from 'tdesign-react';
+import { CheckCircleFilledIcon, CloseCircleFilledIcon, DeleteIcon, InfoCircleIcon } from 'tdesign-icons-react';
 import { useLogto } from '@logto/react';
 import type { CloudResource, ResourceStatus } from '../services/cloudResourceApi';
 import { CloudResourceApiService } from '../services/cloudResourceApi';
@@ -32,6 +32,8 @@ export const ResourceManagement = () => {
   const [rejectDialogVisible, setRejectDialogVisible] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [currentRejectResource, setCurrentRejectResource] = useState<CloudResource | null>(null);
+  const [detailDialogVisible, setDetailDialogVisible] = useState(false);
+  const [currentDetailResource, setCurrentDetailResource] = useState<CloudResource | null>(null);
   const [resources, setResources] = useState<CloudResource[]>([]);
   const [total, setTotal] = useState(0);
   const [current, setCurrent] = useState(1);
@@ -167,9 +169,42 @@ export const ResourceManagement = () => {
 
   const columns = [
     {
+      colKey: 'resource_name',
+      title: '资源名称',
+      width: '180px',
+      cell: (params: any) => (
+        <div className="resource-name-cell">
+          <span className="resource-name-text" title={params.row.resource_name}>
+            {params.row.resource_name}
+          </span>
+          {(params.row.resource_description || params.row.review_note) && (
+            <Tooltip
+              content={
+                <div className="resource-tooltip-content">
+                  {params.row.resource_description && (
+                    <div>描述: {params.row.resource_description}</div>
+                  )}
+                  {params.row.review_note && (
+                    <div>审核备注: {params.row.review_note}</div>
+                  )}
+                </div>
+              }
+            >
+              <InfoCircleIcon className="info-icon" />
+            </Tooltip>
+          )}
+        </div>
+      ),
+    },
+    {
       colKey: 'filename',
       title: '文件名',
       width: '150px',
+      cell: (params: any) => (
+        <span title={params.row.filename} className="filename-cell">
+          {params.row.filename}
+        </span>
+      ),
     },
     {
       colKey: 'category',
@@ -220,47 +255,61 @@ export const ResourceManagement = () => {
     {
       colKey: 'op',
       title: '操作',
-      width: '200px',
+      width: '260px',
       fixed: 'right' as const,
       cell: (params: any) => {
-        if (params.row.status === 'pending') {
-          return (
-            <Space size="small">
-              <Button
-                size="small"
-                theme="success"
-                variant="text"
-                icon={<CheckCircleFilledIcon />}
-                onClick={() => handleApprove(params.row)}
-              >
-                通过
-              </Button>
-              <Button
-                size="small"
-                theme="danger"
-                variant="text"
-                icon={<CloseCircleFilledIcon />}
-                onClick={() => handleOpenRejectDialog(params.row)}
-              >
-                拒绝
-              </Button>
-            </Space>
-          );
-        }
         return (
-          <Button
-            size="small"
-            theme="danger"
-            variant="text"
-            icon={<DeleteIcon />}
-            onClick={() => handleDelete(params.row)}
-          >
-            删除
-          </Button>
+          <Space size="small">
+            <Button
+              size="small"
+              variant="text"
+              icon={<InfoCircleIcon />}
+              onClick={() => handleOpenDetailDialog(params.row)}
+            >
+              详情
+            </Button>
+            {params.row.status === 'pending' && (
+              <>
+                <Button
+                  size="small"
+                  theme="success"
+                  variant="text"
+                  icon={<CheckCircleFilledIcon />}
+                  onClick={() => handleApprove(params.row)}
+                >
+                  通过
+                </Button>
+                <Button
+                  size="small"
+                  theme="danger"
+                  variant="text"
+                  icon={<CloseCircleFilledIcon />}
+                  onClick={() => handleOpenRejectDialog(params.row)}
+                >
+                  拒绝
+                </Button>
+              </>
+            )}
+            <Button
+              size="small"
+              theme="danger"
+              variant="text"
+              icon={<DeleteIcon />}
+              onClick={() => handleDelete(params.row)}
+            >
+              删除
+            </Button>
+          </Space>
         );
       },
     },
   ];
+
+  // 打开详情弹窗
+  const handleOpenDetailDialog = (resource: CloudResource) => {
+    setCurrentDetailResource(resource);
+    setDetailDialogVisible(true);
+  };
 
   return (
     <div className="resource-management">
@@ -337,6 +386,94 @@ export const ResourceManagement = () => {
             rows={4}
           />
         </div>
+      </Dialog>
+
+      <Dialog
+        visible={detailDialogVisible}
+        header="资源详情"
+        cancelBtn="关闭"
+        confirmBtn={null}
+        onClose={() => setDetailDialogVisible(false)}
+        onCancel={() => setDetailDialogVisible(false)}
+        width="600px"
+      >
+        {currentDetailResource && (
+          <div className="detail-dialog-content">
+            <div className="detail-image-wrapper">
+              <Image
+                src={currentDetailResource.url}
+                fit="contain"
+                style={{ maxWidth: '100%', maxHeight: '300px' }}
+              />
+            </div>
+            <div className="detail-info">
+              <div className="detail-item">
+                <span className="detail-label">资源名称：</span>
+                <span className="detail-value">{currentDetailResource.resource_name}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">文件名：</span>
+                <span className="detail-value">{currentDetailResource.filename}</span>
+              </div>
+              {currentDetailResource.resource_description && (
+                <div className="detail-item">
+                  <span className="detail-label">资源描述：</span>
+                  <span className="detail-value">{currentDetailResource.resource_description}</span>
+                </div>
+              )}
+              {currentDetailResource.review_note && (
+                <div className="detail-item highlight">
+                  <span className="detail-label">审核备注：</span>
+                  <span className="detail-value">{currentDetailResource.review_note}</span>
+                </div>
+              )}
+              <div className="detail-item">
+                <span className="detail-label">资源类型：</span>
+                <span className="detail-value">
+                  {CATEGORY_OPTIONS.find(o => o.value === currentDetailResource.category)?.label}
+                </span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">审核状态：</span>
+                <Tag
+                  theme={STATUS_THEME[currentDetailResource.status] as any}
+                  variant="light"
+                >
+                  {STATUS_OPTIONS.find(o => o.value === currentDetailResource.status)?.label}
+                </Tag>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">上传者：</span>
+                <span className="detail-value">{currentDetailResource.user_id}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">上传时间：</span>
+                <span className="detail-value">
+                  {new Date(currentDetailResource.created_at).toLocaleString('zh-CN')}
+                </span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">文件大小：</span>
+                <span className="detail-value">
+                  {(() => {
+                    const bytes = currentDetailResource.file_size;
+                    if (bytes === 0) return '0 B';
+                    const k = 1024;
+                    const sizes = ['B', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+                  })()}
+                </span>
+              </div>
+              {currentDetailResource.reject_reason && (
+                <div className="detail-item error">
+                  <span className="detail-label">拒绝原因：</span>
+                  <span className="detail-value">{currentDetailResource.reject_reason}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </Dialog>
     </div>
   );

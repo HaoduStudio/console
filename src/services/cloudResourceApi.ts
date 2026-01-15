@@ -15,6 +15,9 @@ export interface CloudResource {
   user_id: string;
   key: string;
   filename: string;
+  resource_name: string;
+  resource_description?: string | null;
+  review_note?: string | null;
   category: ResourceCategory;
   mime_type: string;
   file_size: number;
@@ -34,6 +37,8 @@ export interface PublicResource {
   user_id: string;
   key: string;
   filename: string;
+  resource_name: string;
+  resource_description?: string | null;
   category: ResourceCategory;
   mime_type: string;
   file_size: number;
@@ -56,9 +61,18 @@ export interface UploadResponse {
   url: string;
   category: ResourceCategory;
   filename: string;
+  resource_name: string;
   status: ResourceStatus;
   is_public: boolean;
   message: string;
+}
+
+// 上传参数
+export interface UploadParams {
+  resourceName: string;
+  isPublic?: boolean;
+  resourceDescription?: string;
+  reviewNote?: string;
 }
 
 // 可见性更新响应
@@ -172,12 +186,24 @@ export class CloudResourceApiService {
   async uploadResource(
     category: ResourceCategory,
     file: File,
-    isPublic: boolean = false
+    params: UploadParams
   ): Promise<UploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const url = `${API_BASE}/cloud-resource/upload/${category}?is_public=${isPublic}`;
+    const searchParams = new URLSearchParams();
+    searchParams.append('resource_name', params.resourceName);
+    if (params.isPublic !== undefined) {
+      searchParams.append('is_public', params.isPublic.toString());
+    }
+    if (params.resourceDescription) {
+      searchParams.append('resource_description', params.resourceDescription);
+    }
+    if (params.reviewNote) {
+      searchParams.append('review_note', params.reviewNote);
+    }
+
+    const url = `${API_BASE}/cloud-resource/upload/${category}?${searchParams.toString()}`;
     
     const response = await fetch(url, {
       method: 'POST',

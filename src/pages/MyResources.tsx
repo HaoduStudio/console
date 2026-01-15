@@ -14,6 +14,8 @@ import {
   Dialog,
   Checkbox,
   DialogPlugin,
+  Input,
+  Textarea,
 } from 'tdesign-react';
 import type { UploadFile, UploadProps } from 'tdesign-react';
 import {
@@ -42,9 +44,6 @@ const PAGE_SIZE = 20;
 // 支持的文件类型
 const ACCEPT_FILE_TYPES = 'image/png,image/jpeg,image/gif,image/webp,image/svg+xml';
 
-// 移动端断点
-const MOBILE_BREAKPOINT = 768;
-
 export function MyResourcesPage() {
   const { getAccessToken, isAuthenticated } = useLogto();
   const [resources, setResources] = useState<CloudResource[]>([]);
@@ -58,7 +57,9 @@ export function MyResourcesPage() {
   const [uploadIsPublic, setUploadIsPublic] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [uploadResourceName, setUploadResourceName] = useState('');
+  const [uploadResourceDescription, setUploadResourceDescription] = useState('');
+  const [uploadReviewNote, setUploadReviewNote] = useState('');
   const apiServiceRef = useRef<CloudResourceApiService | null>(null);
 
   // 初始化 API 服务
@@ -74,18 +75,6 @@ export function MyResourcesPage() {
       }
     }
   }, [isAuthenticated, getAccessToken]);
-
-  // 检测屏幕宽度
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   useEffect(() => {
     initApiService();
@@ -148,6 +137,9 @@ export function MyResourcesPage() {
     setUploadFiles([]);
     setUploadCategory('emoji');
     setUploadIsPublic(false);
+    setUploadResourceName('');
+    setUploadResourceDescription('');
+    setUploadReviewNote('');
     setUploadDialogVisible(true);
   };
 
@@ -155,6 +147,26 @@ export function MyResourcesPage() {
   const handleUpload = async () => {
     if (uploadFiles.length === 0) {
       MessagePlugin.warning('请选择要上传的文件');
+      return;
+    }
+
+    if (!uploadResourceName.trim()) {
+      MessagePlugin.warning('请输入资源名称');
+      return;
+    }
+
+    if (uploadResourceName.length > 200) {
+      MessagePlugin.warning('资源名称不能超过 200 个字符');
+      return;
+    }
+
+    if (uploadResourceDescription && uploadResourceDescription.length > 2000) {
+      MessagePlugin.warning('资源描述不能超过 2000 个字符');
+      return;
+    }
+
+    if (uploadReviewNote && uploadReviewNote.length > 500) {
+      MessagePlugin.warning('审核备注不能超过 500 个字符');
       return;
     }
 
@@ -177,7 +189,12 @@ export function MyResourcesPage() {
             await apiServiceRef.current.uploadResource(
               uploadCategory,
               uploadFile.raw,
-              uploadIsPublic
+              {
+                resourceName: uploadResourceName.trim(),
+                isPublic: uploadIsPublic,
+                resourceDescription: uploadResourceDescription.trim() || undefined,
+                reviewNote: uploadReviewNote.trim() || undefined,
+              }
             );
             successCount++;
           } catch (error) {
@@ -369,9 +386,17 @@ export function MyResourcesPage() {
                     </div>
                   </div>
                   <div className="resource-info">
+                    <div className="resource-name" title={resource.resource_name}>
+                      {resource.resource_name}
+                    </div>
                     <div className="resource-filename" title={resource.filename}>
                       {resource.filename}
                     </div>
+                    {resource.resource_description && (
+                      <div className="resource-description" title={resource.resource_description}>
+                        {resource.resource_description}
+                      </div>
+                    )}
                     <div className="resource-meta">
                       <Tag size="small" variant="light">
                         {getCategoryText(resource.category)}
@@ -441,6 +466,17 @@ export function MyResourcesPage() {
       >
         <div className="upload-dialog-content">
           <div className="upload-form-item">
+            <label>资源名称 <span className="required">*</span></label>
+            <Input
+              value={uploadResourceName}
+              onChange={(v) => setUploadResourceName(v as string)}
+              placeholder="请输入资源名称（1-200字符）"
+              maxlength={200}
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          <div className="upload-form-item">
             <label>资源类型</label>
             <Select
               value={uploadCategory}
@@ -451,18 +487,40 @@ export function MyResourcesPage() {
           </div>
           
           <div className="upload-form-item">
-            <label>选择文件</label>
+            <label>选择文件 <span className="required">*</span></label>
             <Upload
               files={uploadFiles}
               onChange={handleUploadChange}
-              theme={isMobile ? 'file' : 'image-flow'}
+              theme="image"
               accept={ACCEPT_FILE_TYPES}
-              multiple
+              draggable
               autoUpload={false}
-              max={10}
               sizeLimit={{ size: 10, unit: 'MB', message: '文件大小不能超过 10MB' }}
-              tips="支持 PNG、JPG、GIF、WebP、SVG 格式，单个文件不超过 10MB，最多上传 10 个文件"
-              requestMethod={() => Promise.resolve({ status: 'success', response: {} })}
+              tips="支持 PNG、JPG、GIF、WebP、SVG 格式，单个文件不超过 10MB"
+            />
+          </div>
+
+          <div className="upload-form-item">
+            <label>资源描述</label>
+            <Textarea
+              value={uploadResourceDescription}
+              onChange={(v) => setUploadResourceDescription(v as string)}
+              placeholder="请输入资源描述（可选，最多 2000 字符）"
+              maxlength={2000}
+              autosize={{ minRows: 2, maxRows: 4 }}
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          <div className="upload-form-item">
+            <label>审核备注</label>
+            <Textarea
+              value={uploadReviewNote}
+              onChange={(v) => setUploadReviewNote(v as string)}
+              placeholder="审核备注，供审核员参考（可选，最多 500 字符）"
+              maxlength={500}
+              autosize={{ minRows: 2, maxRows: 3 }}
+              style={{ width: '100%' }}
             />
           </div>
 

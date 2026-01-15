@@ -144,9 +144,14 @@ export function ResourceMarketPage() {
                     )}
                   </div>
                   <div className="resource-info">
-                    <div className="resource-filename" title={resource.filename}>
-                      {resource.filename}
+                    <div className="resource-name" title={resource.resource_name}>
+                      {resource.resource_name}
                     </div>
+                    {resource.resource_description && (
+                      <div className="resource-description" title={resource.resource_description}>
+                        {resource.resource_description}
+                      </div>
+                    )}
                     <div className="resource-meta">
                       <Tag size="small" variant="light">
                         {getCategoryText(resource.category)}
