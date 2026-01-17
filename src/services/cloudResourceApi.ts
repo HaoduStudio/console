@@ -222,29 +222,12 @@ export class CloudResourceApiService {
       searchParams.append('review_note', params.reviewNote);
     }
 
-    const url = `${API_BASE}/cloud-resource/upload/${category}?${searchParams.toString()}`;
-    
-    const response = await fetch(url, {
+    const path = `/cloud-resource/upload/${category}?${searchParams.toString()}`;
+
+    return this.request<UploadResponse>(path, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
-      },
       body: formData,
     });
-
-    if (!response.ok) {
-      if (isAuthenticationError(response.status)) {
-        const errorData = await response.json().catch(() => ({}));
-        await handleAuthenticationFailure(
-          errorData.detail || 'Token 无效或已过期，请重新登录'
-        );
-      }
-      
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `上传失败: ${response.status}`);
-    }
-
-    return response.json();
   }
 
   async getMyResources(params?: {
