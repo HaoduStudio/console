@@ -153,9 +153,36 @@
   gap: 8px;
 }
 
+.resource-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.resource-actions .t-button {
+  padding: 0;
+}
+
 .resource-size {
   font-size: 12px;
   color: var(--td-text-color-secondary);
+}
+
+.add-resource-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.add-resource-form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.add-resource-form-item label {
+  font-size: 14px;
+  color: var(--td-text-color-primary);
 }
 
 .pagination-wrapper {
