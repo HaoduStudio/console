@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useLogto } from '@logto/react';
 import {
   Card,
   Image,
@@ -9,8 +10,11 @@ import {
   Empty,
   Button,
   MessagePlugin,
+  Dialog,
+  Input,
+  Textarea,
 } from 'tdesign-react';
-import { RefreshIcon } from 'tdesign-icons-react';
+import { RefreshIcon, AddIcon } from 'tdesign-icons-react';
 import {
   CloudResourceApiService,
   type PublicResource,
@@ -24,11 +28,35 @@ import './ResourceMarket.css';
 const PAGE_SIZE = 20;
 
 export function ResourceMarketPage() {
+  const { getAccessToken, isAuthenticated } = useLogto();
   const [resources, setResources] = useState<PublicResource[]>([]);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ResourceCategory | ''>('');
+  const [addDialogVisible, setAddDialogVisible] = useState(false);
+  const [addTarget, setAddTarget] = useState<PublicResource | null>(null);
+  const [addResourceName, setAddResourceName] = useState('');
+  const [addResourceDescription, setAddResourceDescription] = useState('');
+  const [adding, setAdding] = useState(false);
+  const apiServiceRef = useRef<CloudResourceApiService | null>(null);
+
+  const initApiService = useCallback(async () => {
+    if (isAuthenticated) {
+      try {
+        const token = await getAccessToken(import.meta.env.VITE_LOGTO_RESOURCES?.split(',')[0]);
+        if (token) {
+          apiServiceRef.current = new CloudResourceApiService(token);
+        }
+      } catch (error) {
+        console.error('获取 access token 失败:', error);
+      }
+    }
+  }, [isAuthenticated, getAccessToken]);
+
+  useEffect(() => {
+    initApiService();
+  }, [initApiService]);
 
   const fetchResources = useCallback(async () => {
     setLoading(true);
@@ -67,6 +95,57 @@ export function ResourceMarketPage() {
 
   const handleImageClick = (resource: PublicResource) => {
     window.open(resource.url, '_blank');
+  };
+
+  const handleOpenAddDialog = (resource: PublicResource) => {
+    if (!isAuthenticated) {
+      MessagePlugin.warning('请先登录后再添加到我的资源');
+      return;
+    }
+    setAddTarget(resource);
+    setAddResourceName(resource.resource_name || '');
+    setAddResourceDescription(resource.resource_description || '');
+    setAddDialogVisible(true);
+  };
+
+  const handleAddToMyResources = async () => {
+    if (!addTarget) return;
+    if (!isAuthenticated) {
+      MessagePlugin.warning('请先登录后再添加到我的资源');
+      return;
+    }
+
+    if (addResourceName.length > 200) {
+      MessagePlugin.warning('资源名称不能超过 200 个字符');
+      return;
+    }
+
+    if (addResourceDescription && addResourceDescription.length > 2000) {
+      MessagePlugin.warning('资源描述不能超过 2000 个字符');
+      return;
+    }
+
+    if (!apiServiceRef.current) {
+      await initApiService();
+    }
+    if (!apiServiceRef.current) {
+      MessagePlugin.error('认证失败，请重新登录');
+      return;
+    }
+
+    setAdding(true);
+    try {
+      await apiServiceRef.current.addPublicResourceToMyResources(addTarget.id, {
+        resourceName: addResourceName.trim() || undefined,
+        resourceDescription: addResourceDescription.trim() || undefined,
+      });
+      MessagePlugin.success('已添加到我的资源');
+      setAddDialogVisible(false);
+    } catch (error) {
+      MessagePlugin.error(error instanceof Error ? error.message : '添加失败');
+    } finally {
+      setAdding(false);
+    }
   };
 
   return (
@@ -160,6 +239,20 @@ export function ResourceMarketPage() {
                         {formatFileSize(resource.file_size)}
                       </span>
                     </div>
+                    <div className="resource-actions">
+                      <Button
+                        size="small"
+                        variant="text"
+                        theme="primary"
+                        icon={<AddIcon />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenAddDialog(resource);
+                        }}
+                      >
+                        添加到我的资源
+                      </Button>
+                    </div>
                   </div>
                 </Card>
               ))}
@@ -180,6 +273,44 @@ export function ResourceMarketPage() {
           </>
         )}
       </Loading>
+
+      <Dialog
+        header="添加到我的资源"
+        visible={addDialogVisible}
+        confirmBtn={{
+          content: '添加',
+          loading: adding,
+        }}
+        cancelBtn="取消"
+        onConfirm={handleAddToMyResources}
+        onClose={() => setAddDialogVisible(false)}
+        width="min(560px, calc(100vw - 32px))"
+      >
+        <div className="add-resource-dialog-content">
+          <div className="add-resource-form-item">
+            <label>资源名称</label>
+            <Input
+              value={addResourceName}
+              onChange={(v) => setAddResourceName(v as string)}
+              placeholder="留空则沿用原名称（1-200字符）"
+              maxlength={200}
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          <div className="add-resource-form-item">
+            <label>资源描述</label>
+            <Textarea
+              value={addResourceDescription}
+              onChange={(v) => setAddResourceDescription(v as string)}
+              placeholder="留空则沿用原描述（最多 2000 字符）"
+              maxlength={2000}
+              autosize={{ minRows: 2, maxRows: 4 }}
+              style={{ width: '100%' }}
+            />
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }

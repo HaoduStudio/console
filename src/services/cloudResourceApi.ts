@@ -88,6 +88,25 @@ export interface DeleteResponse {
   id: number;
 }
 
+// 公开资源添加到我的资源响应
+export interface AddPublicResourceResponse {
+  id: number;
+  key: string;
+  url: string;
+  category: ResourceCategory;
+  filename: string;
+  resource_name: string;
+  status: ResourceStatus;
+  is_public: boolean;
+  message: string;
+}
+
+// 公开资源添加到我的资源参数
+export interface AddPublicResourceParams {
+  resourceName?: string;
+  resourceDescription?: string;
+}
+
 // 资源类别选项
 export const CATEGORY_OPTIONS = [
   { value: 'emoji', label: '表情' },
@@ -270,6 +289,30 @@ export class CloudResourceApiService {
     return this.request<DeleteResponse>(
       `/cloud-resource/my/${resourceId}`,
       { method: 'DELETE' }
+    );
+  }
+
+  async addPublicResourceToMyResources(
+    resourceId: number,
+    params?: AddPublicResourceParams
+  ): Promise<AddPublicResourceResponse> {
+    const payload: Record<string, string> = {};
+    if (params?.resourceName?.trim()) {
+      payload.resource_name = params.resourceName.trim();
+    }
+    if (params?.resourceDescription?.trim()) {
+      payload.resource_description = params.resourceDescription.trim();
+    }
+
+    return this.request<AddPublicResourceResponse>(
+      `/cloud-resource/public/${resourceId}/add`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      }
     );
   }
 
