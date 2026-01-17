@@ -55,7 +55,7 @@ export function ResourceMarketPage() {
   }, [isAuthenticated, getAccessToken]);
 
   useEffect(() => {
-    initApiService();
+    void initApiService();
   }, [initApiService]);
 
   const fetchResources = useCallback(async () => {
@@ -283,7 +283,7 @@ export function ResourceMarketPage() {
         }}
         cancelBtn="取消"
         onConfirm={handleAddToMyResources}
-        onClose={() => setAddDialogVisible(false)}
+        onClose={() => { setAddDialogVisible(false); }}
         width="min(560px, calc(100vw - 32px))"
       >
         <div className="add-resource-dialog-content">
@@ -291,7 +291,7 @@ export function ResourceMarketPage() {
             <label>资源名称</label>
             <Input
               value={addResourceName}
-              onChange={(v) => setAddResourceName(v as string)}
+              onChange={(v) => { setAddResourceName(v as string); }}
               placeholder="留空则沿用原名称（1-200字符）"
               maxlength={200}
               style={{ width: '100%' }}
@@ -302,7 +302,7 @@ export function ResourceMarketPage() {
             <label>资源描述</label>
             <Textarea
               value={addResourceDescription}
-              onChange={(v) => setAddResourceDescription(v as string)}
+              onChange={(v) => { setAddResourceDescription(v as string); }}
               placeholder="留空则沿用原描述（最多 2000 字符）"
               maxlength={2000}
               autosize={{ minRows: 2, maxRows: 4 }}
