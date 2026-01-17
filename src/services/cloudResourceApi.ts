@@ -388,20 +388,8 @@ export class CloudResourceApiService {
     );
   }
 
-  async approveResource(resourceId: number): Promise<{
-    id: number;
-    status: string;
-    reviewed_by: string;
-    reviewed_at: string;
-    message: string;
-  }> {
-    return this.request<{
-      id: number;
-      status: string;
-      reviewed_by: string;
-      reviewed_at: string;
-      message: string;
-    }>(`/admin/cloud-resource/${resourceId}/approve`, {
+  async approveResource(resourceId: number): Promise<ReviewResponse> {
+    return this.request<ReviewResponse>(`/admin/cloud-resource/${resourceId}/approve`, {
       method: 'POST',
     });
   }
@@ -409,20 +397,8 @@ export class CloudResourceApiService {
   async rejectResource(
     resourceId: number,
     reason: string
-  ): Promise<{
-    id: number;
-    status: string;
-    reviewed_by: string;
-    reviewed_at: string;
-    message: string;
-  }> {
-    return this.request<{
-      id: number;
-      status: string;
-      reviewed_by: string;
-      reviewed_at: string;
-      message: string;
-    }>(`/admin/cloud-resource/${resourceId}/reject`, {
+  ): Promise<ReviewResponse> {
+    return this.request<ReviewResponse>(`/admin/cloud-resource/${resourceId}/reject`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -450,4 +426,12 @@ export interface CloudResourceStats {
   pending: number;
   approved: number;
   rejected: number;
+}
+
+export interface ReviewResponse {
+  id: number;
+  status: string;
+  reviewed_by: string;
+  reviewed_at: string;
+  message: string;
 }
