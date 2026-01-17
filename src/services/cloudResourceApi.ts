@@ -169,6 +169,11 @@ export class CloudResourceApiService {
     this.accessToken = accessToken;
   }
 
+  private async parseErrorDetail(response: Response, defaultMessage: string): Promise<string> {
+    const errorData = await response.json().catch(() => ({} as { detail?: string }));
+    return errorData.detail || defaultMessage;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -185,14 +190,18 @@ export class CloudResourceApiService {
 
     if (!response.ok) {
       if (isAuthenticationError(response.status)) {
-        const errorData = await response.json().catch(() => ({}));
-        await handleAuthenticationFailure(
-          errorData.detail || 'Token 无效或已过期，请重新登录'
+        const message = await this.parseErrorDetail(
+          response,
+          'Token 无效或已过期，请重新登录'
         );
+        await handleAuthenticationFailure(message);
       }
       
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `请求失败: ${response.status}`);
+      const message = await this.parseErrorDetail(
+        response,
+        `请求失败: ${response.status}`
+      );
+      throw new Error(message);
     }
 
     const text = await response.text();
