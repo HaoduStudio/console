@@ -1,5 +1,7 @@
 # Dailys Network Console
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cc6f6b21e0094b5c8bf20805caa7965e)](https://app.codacy.com/gh/HaoduStudio/console?utm_source=github.com&utm_medium=referral&utm_content=HaoduStudio/console&utm_campaign=Badge_Grade)
+
 一个集成了 `Dailys Network API` 的用户/管理员操作面板，用户可以操作上传并管理云端资源、云同步数据，管理员可以管理所有用户数据。
 
 该项目为 `Console` 的前端部分，使用 React + TypeScript + Vite 编写而成。
