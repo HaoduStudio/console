@@ -316,7 +316,7 @@ export class CloudResourceApiService {
     );
   }
 
-  static async getPublicResources(params?: {
+  async getPublicResources(params?: {
     category?: ResourceCategory;
     limit?: number;
     offset?: number;
@@ -327,16 +327,9 @@ export class CloudResourceApiService {
     if (params?.offset) searchParams.append('offset', params.offset.toString());
 
     const queryString = searchParams.toString();
-    const url = `${API_BASE}/cloud-resource/public${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `/cloud-resource/public${queryString ? `?${queryString}` : ''}`;
     
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `请求失败: ${response.status}`);
-    }
-
-    return response.json();
+    return this.request<PaginatedResponse<PublicResource>>(endpoint);
   }
 
   async getPendingResources(params?: {
