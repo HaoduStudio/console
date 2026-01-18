@@ -197,7 +197,7 @@ export class CaptchaManager {
 
     return new Promise((resolve, reject) => {
       this.buttonSelector = buttonId;
-      window.initAliyunCaptcha!({
+      window.initAliyunCaptcha?.({
         SceneId: this.config.sceneId,
         mode: 'popup',
         element: elementId,
@@ -221,7 +221,7 @@ export class CaptchaManager {
           // F001 表示验证码未完成验证（用户还没滑动）
           // 这种情况通常发生在 refresh() 后 SDK 内部状态检查时
           // 不应该 reject Promise，让用户继续完成验证
-          if (failResult?.verifyCode === 'F001') {
+          if (failResult.verifyCode === 'F001') {
             console.log('Captcha not yet completed, waiting for user verification...');
             return;
           }
@@ -236,7 +236,7 @@ export class CaptchaManager {
           if (this.pendingReject) {
             // 根据结果提供更详细的错误信息
             let errorMessage = '验证失败，请重试';
-            if (failResult?.verifyCode) {
+            if (failResult.verifyCode) {
               const codeMessage = ESA_VERIFY_CODES[failResult.verifyCode as keyof typeof ESA_VERIFY_CODES];
               if (codeMessage) {
                 errorMessage = codeMessage;

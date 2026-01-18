@@ -49,7 +49,7 @@ export const AdminDashboard = () => {
       }
     };
 
-    loadStats();
+    void loadStats();
   }, [getAccessToken]);
 
   if (loading) {

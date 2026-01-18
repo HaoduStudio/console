@@ -148,7 +148,7 @@ export class AnnouncementApiService {
       const errorData = await response.json().catch(() => ({}));
       
       if (isAuthenticationError(response.status)) {
-        handleAuthenticationFailure();
+        void handleAuthenticationFailure();
       }
       
       throw new Error(errorData.message || `请求失败: ${response.status}`);

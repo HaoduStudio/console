@@ -89,7 +89,7 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
       }
     };
 
-    initService();
+    void initService();
   }, [getAccessToken, isAuthenticated]);
 
   // 加载所有公告（首次加载）
@@ -130,7 +130,7 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
   // 服务初始化后加载公告
   useEffect(() => {
     if (service) {
-      loadAnnouncements(true);
+      void loadAnnouncements(true);
     }
   }, [service, loadAnnouncements]);
 
@@ -249,7 +249,7 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
                       key={item.id}
                       className="announcement-item"
                       data-read={item.is_read}
-                      onClick={() => handleViewDetail(item)}
+                      onClick={() => { handleViewDetail(item); }}
                     >
                       <div className="announcement-item-content">
                         <div className="announcement-item-header">
@@ -368,7 +368,7 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
         }
         footer={
           <div className="announcement-dialog-footer">
-            <Button variant="outline" onClick={() => setDetailDialogVisible(false)}>
+            <Button variant="outline" onClick={() => { setDetailDialogVisible(false); }}>
               关闭
             </Button>
             {selectedAnnouncement && !selectedAnnouncement.is_read && (
@@ -382,7 +382,7 @@ export const AnnouncementNotification = ({ onAnnouncementCheck }: AnnouncementNo
             )}
           </div>
         }
-        onClose={() => setDetailDialogVisible(false)}
+        onClose={() => { setDetailDialogVisible(false); }}
         width={600}
       >
         {selectedAnnouncement && (

@@ -77,7 +77,7 @@ export function ResourceMarketPage() {
   }, [currentPage, selectedCategory]);
 
   useEffect(() => {
-    fetchResources();
+    void fetchResources();
   }, [fetchResources]);
 
   const handleCategoryChange = (value: unknown) => {
@@ -201,7 +201,7 @@ export function ResourceMarketPage() {
                   className="resource-card"
                   hoverShadow
                 >
-                  <div className="resource-image-wrapper" onClick={() => handleImageClick(resource)}>
+                  <div className="resource-image-wrapper" onClick={() => { handleImageClick(resource); }}>
                     {resource.url ? (
                       <Image
                         src={resource.url}
