@@ -98,6 +98,7 @@ export interface AddPublicResourceResponse {
   resource_name: string;
   status: ResourceStatus;
   is_public: boolean;
+  source_resource_id: number;
   message: string;
 }
 
@@ -105,6 +106,12 @@ export interface AddPublicResourceResponse {
 export interface AddPublicResourceParams {
   resourceName?: string;
   resourceDescription?: string;
+}
+
+// 已收藏公开资源列表响应
+export interface AddedPublicResourceIdsResponse {
+  resource_ids: number[];
+  total: number;
 }
 
 // 资源类别选项
@@ -313,6 +320,12 @@ export class CloudResourceApiService {
         },
         body: JSON.stringify(payload),
       }
+    );
+  }
+
+  async getAddedPublicResourceIds(): Promise<AddedPublicResourceIdsResponse> {
+    return this.request<AddedPublicResourceIdsResponse>(
+      '/cloud-resource/public/added'
     );
   }
 
