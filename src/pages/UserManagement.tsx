@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Table, Card, Button, Form, Input, Select, MessagePlugin, Space, Pagination, Loading, Dialog, DialogPlugin, Textarea } from 'tdesign-react';
+import type { TableProps } from 'tdesign-react';
 import { PlusIcon, DeleteIcon, EditIcon } from 'tdesign-icons-react';
 import { useLogto } from '@logto/react';
 import type { UserRole } from '../services/identityApi';
@@ -54,7 +55,7 @@ export const UserManagement = () => {
   }, [getAccessToken]);
 
   // 加载数据
-  const loadUsers = async (page: number = 1, size: number = 10) => {
+  const loadUsers = useCallback(async (page: number = 1, size: number = 10) => {
     if (!service) return;
 
     try {
@@ -74,13 +75,13 @@ export const UserManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [service]);
 
   useEffect(() => {
     if (service) {
       loadUsers(1, 10);
     }
-  }, [service]);
+  }, [service, loadUsers]);
 
   const handleOpenDialog = (user?: UserRole) => {
     setEditingUser(user || null);
@@ -163,7 +164,7 @@ export const UserManagement = () => {
     });
   };
 
-  const columns = [
+  const columns: TableProps<UserRole>['columns'] = [
     {
       colKey: 'logto_user_id',
       title: '用户ID',
@@ -173,22 +174,22 @@ export const UserManagement = () => {
       colKey: 'nickname',
       title: '昵称',
       width: '120px',
-      cell: (params: any) => params.row.nickname || '-',
+      cell: ({ row }) => row.nickname || '-',
     },
     {
       colKey: 'role',
       title: '角色',
       width: '100px',
-      cell: (params: any) => {
-        const roleOption = ROLE_OPTIONS.find(r => r.value === params.row.role);
+      cell: ({ row }) => {
+        const roleOption = ROLE_OPTIONS.find(r => r.value === row.role);
         return (
           <span
             style={{
-              color: ROLE_COLORS[params.row.role],
+              color: ROLE_COLORS[row.role],
               fontWeight: 500,
             }}
           >
-            {roleOption?.label || params.row.role}
+            {roleOption?.label || row.role}
           </span>
         );
       },
@@ -197,33 +198,33 @@ export const UserManagement = () => {
       colKey: 'remark',
       title: '备注',
       width: '200px',
-      cell: (params: any) => params.row.remark || '-',
+      cell: ({ row }) => row.remark || '-',
     },
     {
       colKey: 'created_at',
       title: '创建时间',
       width: '180px',
-      cell: (params: any) => new Date(params.row.created_at).toLocaleString('zh-CN'),
+      cell: ({ row }) => new Date(row.created_at).toLocaleString('zh-CN'),
     },
     {
       colKey: 'op',
       title: '操作',
       width: '120px',
       fixed: 'right' as const,
-      cell: (params: any) => (
+      cell: ({ row }) => (
         <Space size="small">
           <Button
             size="small"
             variant="text"
             icon={<EditIcon />}
-            onClick={() => handleOpenDialog(params.row)}
+            onClick={() => handleOpenDialog(row)}
           />
           <Button
             size="small"
             variant="text"
             theme="danger"
             icon={<DeleteIcon />}
-            onClick={() => handleDelete(params.row)}
+            onClick={() => handleDelete(row)}
           />
         </Space>
       ),

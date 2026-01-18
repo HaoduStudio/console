@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Layout, Menu, Button, Dropdown, DialogPlugin, Drawer } from 'tdesign-react';
+import type { DropdownOption } from 'tdesign-react';
 import { 
   DashboardIcon, 
   UserIcon,
@@ -26,15 +27,25 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [username, setUsername] = useState('Admin');
   const navigate = useNavigate();
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+
+  const getInitialLayoutState = () => {
+    const width = typeof window !== 'undefined' ? window.innerWidth : TABLET_BREAKPOINT;
+    const mobile = width < MOBILE_BREAKPOINT;
+    return {
+      mobile,
+      collapsed: !mobile && width < TABLET_BREAKPOINT,
+    };
+  };
+
+  const [collapsed, setCollapsed] = useState(() => getInitialLayoutState().collapsed);
+  const [isMobile, setIsMobile] = useState(() => getInitialLayoutState().mobile);
   const [drawerVisible, setDrawerVisible] = useState(false);
 
   const handleResize = useCallback(() => {
     const width = window.innerWidth;
     const mobile = width < MOBILE_BREAKPOINT;
     setIsMobile(mobile);
-    
+
     if (width < TABLET_BREAKPOINT && !mobile) {
       setCollapsed(true);
     }
@@ -45,7 +56,6 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [handleResize]);
@@ -82,7 +92,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const handleUserMenuClick = (data: any) => {
+  const handleUserMenuClick = (data: DropdownOption) => {
     if (data.value === 'logout') {
       handleLogout();
     } else if (data.value === 'user-center') {

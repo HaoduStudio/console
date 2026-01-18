@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Table, Card, Button, Dialog, Select, MessagePlugin, Space, Pagination, Loading, Tag, Textarea, DialogPlugin, Tooltip, Image } from 'tdesign-react';
+import type { TableProps } from 'tdesign-react';
 import { CheckCircleFilledIcon, CloseCircleFilledIcon, DeleteIcon, InfoCircleIcon } from 'tdesign-icons-react';
 import { useLogto } from '@logto/react';
 import type { CloudResource, ResourceStatus } from '../services/cloudResourceApi';
@@ -20,7 +21,9 @@ const STATUS_OPTIONS = [
   { label: '已拒绝', value: 'rejected' },
 ];
 
-const STATUS_THEME: Record<string, string> = {
+type StatusFilter = ResourceStatus | 'pending' | 'all';
+
+const STATUS_THEME: Record<ResourceStatus, 'warning' | 'success' | 'danger'> = {
   pending: 'warning',
   approved: 'success',
   rejected: 'danger',
@@ -38,7 +41,7 @@ export const ResourceManagement = () => {
   const [total, setTotal] = useState(0);
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [statusFilter, setStatusFilter] = useState<string>('pending');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
   const [service, setService] = useState<CloudResourceApiService | null>(null);
 
   // 初始化服务
@@ -60,7 +63,11 @@ export const ResourceManagement = () => {
   }, [getAccessToken]);
 
   // 加载数据
-  const loadResources = async (page: number = 1, size: number = 10, status: string = 'pending') => {
+  const loadResources = useCallback(async (
+    page: number = 1,
+    size: number = 10,
+    status: StatusFilter = 'pending'
+  ) => {
     if (!service) return;
 
     try {
@@ -90,13 +97,13 @@ export const ResourceManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [service]);
 
   useEffect(() => {
     if (service) {
       loadResources(1, 10, statusFilter);
     }
-  }, [service]);
+  }, [service, loadResources, statusFilter]);
 
   // 审核通过
   const handleApprove = async (resource: CloudResource) => {
@@ -167,25 +174,25 @@ export const ResourceManagement = () => {
     });
   };
 
-  const columns = [
+  const columns: TableProps<CloudResource>['columns'] = [
     {
       colKey: 'resource_name',
       title: '资源名称',
       width: '180px',
-      cell: (params: any) => (
+      cell: ({ row }) => (
         <div className="resource-name-cell">
-          <span className="resource-name-text" title={params.row.resource_name}>
-            {params.row.resource_name}
+          <span className="resource-name-text" title={row.resource_name}>
+            {row.resource_name}
           </span>
-          {(params.row.resource_description || params.row.review_note) && (
+          {(row.resource_description || row.review_note) && (
             <Tooltip
               content={
                 <div className="resource-tooltip-content">
-                  {params.row.resource_description && (
-                    <div>描述: {params.row.resource_description}</div>
+                  {row.resource_description && (
+                    <div>描述: {row.resource_description}</div>
                   )}
-                  {params.row.review_note && (
-                    <div>审核备注: {params.row.review_note}</div>
+                  {row.review_note && (
+                    <div>审核备注: {row.review_note}</div>
                   )}
                 </div>
               }
@@ -200,9 +207,9 @@ export const ResourceManagement = () => {
       colKey: 'filename',
       title: '文件名',
       width: '150px',
-      cell: (params: any) => (
-        <span title={params.row.filename} className="filename-cell">
-          {params.row.filename}
+      cell: ({ row }) => (
+        <span title={row.filename} className="filename-cell">
+          {row.filename}
         </span>
       ),
     },
@@ -210,9 +217,9 @@ export const ResourceManagement = () => {
       colKey: 'category',
       title: '分类',
       width: '80px',
-      cell: (params: any) => {
-        const option = CATEGORY_OPTIONS.find(o => o.value === params.row.category);
-        return option?.label || params.row.category;
+      cell: ({ row }) => {
+        const option = CATEGORY_OPTIONS.find(o => o.value === row.category);
+        return option?.label || row.category;
       },
     },
     {
@@ -224,12 +231,12 @@ export const ResourceManagement = () => {
       colKey: 'status',
       title: '状态',
       width: '100px',
-      cell: (params: any) => (
+      cell: ({ row }) => (
         <Tag
-          theme={STATUS_THEME[params.row.status] as any}
+          theme={STATUS_THEME[row.status]}
           variant="light"
         >
-          {STATUS_OPTIONS.find(o => o.value === params.row.status)?.label}
+          {STATUS_OPTIONS.find(o => o.value === row.status)?.label}
         </Tag>
       ),
     },
@@ -237,8 +244,8 @@ export const ResourceManagement = () => {
       colKey: 'file_size',
       title: '文件大小',
       width: '100px',
-      cell: (params: any) => {
-        const bytes = params.row.file_size;
+      cell: ({ row }) => {
+        const bytes = row.file_size;
         if (bytes === 0) return '0 B';
         const k = 1024;
         const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -250,32 +257,32 @@ export const ResourceManagement = () => {
       colKey: 'created_at',
       title: '上传时间',
       width: '160px',
-      cell: (params: any) => new Date(params.row.created_at).toLocaleString('zh-CN'),
+      cell: ({ row }) => new Date(row.created_at).toLocaleString('zh-CN'),
     },
     {
       colKey: 'op',
       title: '操作',
       width: '260px',
       fixed: 'right' as const,
-      cell: (params: any) => {
+      cell: ({ row }) => {
         return (
           <Space size="small">
             <Button
               size="small"
               variant="text"
               icon={<InfoCircleIcon />}
-              onClick={() => handleOpenDetailDialog(params.row)}
+              onClick={() => handleOpenDetailDialog(row)}
             >
               详情
             </Button>
-            {params.row.status === 'pending' && (
+            {row.status === 'pending' && (
               <>
                 <Button
                   size="small"
                   theme="success"
                   variant="text"
                   icon={<CheckCircleFilledIcon />}
-                  onClick={() => handleApprove(params.row)}
+                  onClick={() => handleApprove(row)}
                 >
                   通过
                 </Button>
@@ -284,7 +291,7 @@ export const ResourceManagement = () => {
                   theme="danger"
                   variant="text"
                   icon={<CloseCircleFilledIcon />}
-                  onClick={() => handleOpenRejectDialog(params.row)}
+                  onClick={() => handleOpenRejectDialog(row)}
                 >
                   拒绝
                 </Button>
@@ -295,7 +302,7 @@ export const ResourceManagement = () => {
               theme="danger"
               variant="text"
               icon={<DeleteIcon />}
-              onClick={() => handleDelete(params.row)}
+              onClick={() => handleDelete(row)}
             >
               删除
             </Button>
@@ -324,8 +331,9 @@ export const ResourceManagement = () => {
               { label: '全部', value: 'all' },
             ]}
             onChange={(value) => {
-              setStatusFilter(value as string);
-              loadResources(1, pageSize, value as string);
+              const next = value as StatusFilter;
+              setStatusFilter(next);
+              loadResources(1, pageSize, next);
             }}
             style={{ width: '150px' }}
           />
@@ -436,7 +444,7 @@ export const ResourceManagement = () => {
               <div className="detail-item">
                 <span className="detail-label">审核状态：</span>
                 <Tag
-                  theme={STATUS_THEME[currentDetailResource.status] as any}
+                  theme={STATUS_THEME[currentDetailResource.status]}
                   variant="light"
                 >
                   {STATUS_OPTIONS.find(o => o.value === currentDetailResource.status)?.label}

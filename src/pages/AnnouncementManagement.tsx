@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   Button,
@@ -81,7 +81,7 @@ export const AnnouncementManagement = () => {
   }, [getAccessToken]);
 
   // 加载数据
-  const loadAnnouncements = async (
+  const loadAnnouncements = useCallback(async (
     page: number = 1,
     size: number = 10,
     type?: string,
@@ -108,13 +108,13 @@ export const AnnouncementManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [service]);
 
   useEffect(() => {
     if (service) {
       loadAnnouncements(1, 10, typeFilter, activeFilter);
     }
-  }, [service]);
+  }, [service, loadAnnouncements, typeFilter, activeFilter]);
 
   const handleOpenDialog = (announcement?: Announcement) => {
     setEditingAnnouncement(announcement || null);

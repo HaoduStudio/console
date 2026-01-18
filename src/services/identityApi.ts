@@ -74,8 +74,8 @@ export class IdentityApiService {
     const data: T = await response.json();
 
     if (!response.ok) {
-      const error = data as any;
-      throw new Error(error.detail || `API error: ${response.status}`);
+      const errorDetails = (data as { detail?: string } | undefined)?.detail;
+      throw new Error(errorDetails || `API error: ${response.status}`);
     }
 
     return data;
