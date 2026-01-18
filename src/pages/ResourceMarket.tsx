@@ -14,7 +14,7 @@ import {
   Input,
   Textarea,
 } from 'tdesign-react';
-import { RefreshIcon, AddIcon } from 'tdesign-icons-react';
+import { RefreshIcon, AddIcon, CheckIcon } from 'tdesign-icons-react';
 import {
   CloudResourceApiService,
   type PublicResource,
@@ -39,6 +39,7 @@ export function ResourceMarketPage() {
   const [addResourceName, setAddResourceName] = useState('');
   const [addResourceDescription, setAddResourceDescription] = useState('');
   const [adding, setAdding] = useState(false);
+  const [addedResourceIds, setAddedResourceIds] = useState<Set<number>>(() => new Set());
   const apiServiceRef = useRef<CloudResourceApiService | null>(null);
 
   const initApiService = useCallback(async () => {
@@ -57,6 +58,30 @@ export function ResourceMarketPage() {
   useEffect(() => {
     void initApiService();
   }, [initApiService]);
+
+  const ensureApiService = useCallback(async () => {
+    if (!apiServiceRef.current) {
+      await initApiService();
+    }
+    return apiServiceRef.current;
+  }, [initApiService]);
+
+  const fetchAddedResourceIds = useCallback(async () => {
+    if (!isAuthenticated) {
+      setAddedResourceIds(new Set());
+      return;
+    }
+
+    const service = await ensureApiService();
+    if (!service) return;
+
+    try {
+      const result = await service.getAddedPublicResourceIds();
+      setAddedResourceIds(new Set(result.resource_ids));
+    } catch (error) {
+      MessagePlugin.error(error instanceof Error ? error.message : '获取收藏状态失败');
+    }
+  }, [ensureApiService, isAuthenticated]);
 
   const fetchResources = useCallback(async () => {
     setLoading(true);
@@ -80,6 +105,10 @@ export function ResourceMarketPage() {
     void fetchResources();
   }, [fetchResources]);
 
+  useEffect(() => {
+    void fetchAddedResourceIds();
+  }, [fetchAddedResourceIds]);
+
   const handleCategoryChange = (value: unknown) => {
     setSelectedCategory(value as ResourceCategory | '');
     setCurrentPage(1);
@@ -99,7 +128,11 @@ export function ResourceMarketPage() {
 
   const handleOpenAddDialog = (resource: PublicResource) => {
     if (!isAuthenticated) {
-      MessagePlugin.warning('请先登录后再添加到我的资源');
+      MessagePlugin.warning('请先登录后再收藏');
+      return;
+    }
+    if (addedResourceIds.has(resource.id)) {
+      MessagePlugin.info('已收藏该资源');
       return;
     }
     setAddTarget(resource);
@@ -111,7 +144,7 @@ export function ResourceMarketPage() {
   const handleAddToMyResources = async () => {
     if (!addTarget) return;
     if (!isAuthenticated) {
-      MessagePlugin.warning('请先登录后再添加到我的资源');
+      MessagePlugin.warning('请先登录后再收藏');
       return;
     }
 
@@ -125,24 +158,27 @@ export function ResourceMarketPage() {
       return;
     }
 
-    if (!apiServiceRef.current) {
-      await initApiService();
-    }
-    if (!apiServiceRef.current) {
+    const service = await ensureApiService();
+    if (!service) {
       MessagePlugin.error('认证失败，请重新登录');
       return;
     }
 
     setAdding(true);
     try {
-      await apiServiceRef.current.addPublicResourceToMyResources(addTarget.id, {
+      await service.addPublicResourceToMyResources(addTarget.id, {
         resourceName: addResourceName.trim() || undefined,
         resourceDescription: addResourceDescription.trim() || undefined,
       });
-      MessagePlugin.success('已添加到我的资源');
+      setAddedResourceIds((prev) => {
+        const next = new Set(prev);
+        next.add(addTarget.id);
+        return next;
+      });
+      MessagePlugin.success('收藏成功');
       setAddDialogVisible(false);
     } catch (error) {
-      MessagePlugin.error(error instanceof Error ? error.message : '添加失败');
+      MessagePlugin.error(error instanceof Error ? error.message : '收藏失败');
     } finally {
       setAdding(false);
     }
@@ -240,6 +276,17 @@ export function ResourceMarketPage() {
                       </span>
                     </div>
                     <div className="resource-actions">
+                      {addedResourceIds.has(resource.id) ? (
+                        <Button
+                          size="small"
+                          variant="base"
+                          theme="success"
+                          icon={<CheckIcon />}
+                          disabled
+                        >
+                          已收藏
+                        </Button>
+                      ) : (
                       <Button
                         size="small"
                         variant="text"
@@ -250,8 +297,9 @@ export function ResourceMarketPage() {
                           handleOpenAddDialog(resource);
                         }}
                       >
-                        添加到我的资源
+                        收藏
                       </Button>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -275,10 +323,10 @@ export function ResourceMarketPage() {
       </Loading>
 
       <Dialog
-        header="添加到我的资源"
+        header="收藏资源"
         visible={addDialogVisible}
         confirmBtn={{
-          content: '添加',
+          content: '收藏',
           loading: adding,
         }}
         cancelBtn="取消"
