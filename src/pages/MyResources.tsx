@@ -77,7 +77,7 @@ export function MyResourcesPage() {
   }, [isAuthenticated, getAccessToken]);
 
   useEffect(() => {
-    initApiService();
+    void initApiService();
   }, [initApiService]);
 
   const fetchResources = useCallback(async () => {
@@ -106,7 +106,7 @@ export function MyResourcesPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchResources();
+      void fetchResources();
     }
   }, [isAuthenticated, fetchResources]);
 
@@ -355,7 +355,7 @@ export function MyResourcesPage() {
                   className="resource-card"
                   hoverShadow
                 >
-                  <div className="resource-image-wrapper" onClick={() => handleImageClick(resource)}>
+                  <div className="resource-image-wrapper" onClick={() => { handleImageClick(resource); }}>
                     {resource.url ? (
                       <Image
                         src={resource.url}
@@ -426,7 +426,7 @@ export function MyResourcesPage() {
                         variant="text"
                         theme="danger"
                         icon={<DeleteIcon />}
-                        onClick={() => handleDelete(resource)}
+                        onClick={() => { handleDelete(resource); }}
                       >
                         删除
                       </Button>
@@ -461,7 +461,7 @@ export function MyResourcesPage() {
         }}
         cancelBtn="取消"
         onConfirm={handleUpload}
-        onClose={() => setUploadDialogVisible(false)}
+        onClose={() => { setUploadDialogVisible(false); }}
         width="min(600px, calc(100vw - 32px))"
       >
         <div className="upload-dialog-content">
@@ -469,7 +469,7 @@ export function MyResourcesPage() {
             <label>资源名称 <span className="required">*</span></label>
             <Input
               value={uploadResourceName}
-              onChange={(v) => setUploadResourceName(v as string)}
+              onChange={(v) => { setUploadResourceName(v as string); }}
               placeholder="请输入资源名称（1-200字符）"
               maxlength={200}
               style={{ width: '100%' }}
@@ -480,7 +480,7 @@ export function MyResourcesPage() {
             <label>资源类型</label>
             <Select
               value={uploadCategory}
-              onChange={(v) => setUploadCategory(v as ResourceCategory)}
+              onChange={(v) => { setUploadCategory(v as ResourceCategory); }}
               style={{ width: '100%' }}
               options={CATEGORY_OPTIONS}
             />
@@ -504,7 +504,7 @@ export function MyResourcesPage() {
             <label>资源描述</label>
             <Textarea
               value={uploadResourceDescription}
-              onChange={(v) => setUploadResourceDescription(v as string)}
+              onChange={(v) => { setUploadResourceDescription(v as string); }}
               placeholder="请输入资源描述（可选，最多 2000 字符）"
               maxlength={2000}
               autosize={{ minRows: 2, maxRows: 4 }}
@@ -516,7 +516,7 @@ export function MyResourcesPage() {
             <label>审核备注</label>
             <Textarea
               value={uploadReviewNote}
-              onChange={(v) => setUploadReviewNote(v as string)}
+              onChange={(v) => { setUploadReviewNote(v as string); }}
               placeholder="审核备注，供审核员参考（可选，最多 500 字符）"
               maxlength={500}
               autosize={{ minRows: 2, maxRows: 3 }}
@@ -527,7 +527,7 @@ export function MyResourcesPage() {
           <div className="upload-form-item checkbox-item">
             <Checkbox
               checked={uploadIsPublic}
-              onChange={(checked) => setUploadIsPublic(checked as boolean)}
+              onChange={(checked) => { setUploadIsPublic(checked as boolean); }}
             >
               审核通过后公开到资源广场
             </Checkbox>

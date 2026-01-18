@@ -77,7 +77,7 @@ export const AnnouncementManagement = () => {
       }
     };
 
-    initService();
+    void initService();
   }, [getAccessToken]);
 
   // 加载数据
@@ -112,7 +112,7 @@ export const AnnouncementManagement = () => {
 
   useEffect(() => {
     if (service) {
-      loadAnnouncements(1, 10, typeFilter, activeFilter);
+      void loadAnnouncements(1, 10, typeFilter, activeFilter);
     }
   }, [service, loadAnnouncements, typeFilter, activeFilter]);
 
@@ -207,7 +207,7 @@ export const AnnouncementManagement = () => {
       }
 
       setDialogVisible(false);
-      loadAnnouncements(current, pageSize, typeFilter, activeFilter);
+      void loadAnnouncements(current, pageSize, typeFilter, activeFilter);
     } catch (error) {
       console.error('提交失败:', error);
       MessagePlugin.error('操作失败');
@@ -343,7 +343,7 @@ export const AnnouncementManagement = () => {
             size="small"
             variant="text"
             icon={<EditIcon />}
-            onClick={() => handleOpenDialog(row)}
+            onClick={() => { handleOpenDialog(row); }}
           />
           <Button
             size="small"
@@ -358,7 +358,7 @@ export const AnnouncementManagement = () => {
             variant="text"
             theme="danger"
             icon={<DeleteIcon />}
-            onClick={() => handleDelete(row)}
+            onClick={() => { handleDelete(row); }}
           />
         </Space>
       ),
@@ -378,7 +378,7 @@ export const AnnouncementManagement = () => {
               ]}
               onChange={(value) => {
                 setTypeFilter(value as string);
-                loadAnnouncements(1, pageSize, value as string, activeFilter);
+                void loadAnnouncements(1, pageSize, value as string, activeFilter);
               }}
               style={{ width: '130px' }}
             />
@@ -391,12 +391,12 @@ export const AnnouncementManagement = () => {
               ]}
               onChange={(value) => {
                 setActiveFilter(value as string);
-                loadAnnouncements(1, pageSize, typeFilter, value as string);
+                void loadAnnouncements(1, pageSize, typeFilter, value as string);
               }}
               style={{ width: '120px' }}
             />
           </Space>
-          <Button theme="primary" icon={<PlusIcon />} onClick={() => handleOpenDialog()}>
+          <Button theme="primary" icon={<PlusIcon />} onClick={() => { handleOpenDialog(); }}>
             新增公告
           </Button>
         </div>
@@ -427,10 +427,10 @@ export const AnnouncementManagement = () => {
                 total={total}
                 pageSizeOptions={[10, 20, 50]}
                 onChange={(pageInfo) => {
-                  loadAnnouncements(pageInfo.current, pageInfo.pageSize, typeFilter, activeFilter);
+                  void loadAnnouncements(pageInfo.current, pageInfo.pageSize, typeFilter, activeFilter);
                 }}
                 onPageSizeChange={(size, pageInfo) => {
-                  loadAnnouncements(pageInfo.current, size, typeFilter, activeFilter);
+                  void loadAnnouncements(pageInfo.current, size, typeFilter, activeFilter);
                 }}
               />
             </div>
@@ -445,8 +445,8 @@ export const AnnouncementManagement = () => {
         confirmBtn="保存"
         cancelBtn="取消"
         onConfirm={handleSubmit}
-        onCancel={() => setDialogVisible(false)}
-        onClose={() => setDialogVisible(false)}
+        onCancel={() => { setDialogVisible(false); }}
+        onClose={() => { setDialogVisible(false); }}
         width={700}
       >
         <Form form={form} labelWidth={100} labelAlign="right">
@@ -507,11 +507,11 @@ export const AnnouncementManagement = () => {
         visible={statsDialogVisible}
         header={`统计 - ${editingAnnouncement?.title || ''}`}
         footer={
-          <Button theme="primary" onClick={() => setStatsDialogVisible(false)}>
+          <Button theme="primary" onClick={() => { setStatsDialogVisible(false); }}>
             关闭
           </Button>
         }
-        onClose={() => setStatsDialogVisible(false)}
+        onClose={() => { setStatsDialogVisible(false); }}
         width={400}
       >
         {currentStats && (

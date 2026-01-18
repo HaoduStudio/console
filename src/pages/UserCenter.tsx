@@ -120,7 +120,7 @@ export function UserCenterPage() {
       }
     };
 
-    initCaptcha();
+    void initCaptcha();
   }, [captchaEnabled]);
 
   // 当密码验证对话框打开时，初始化验证码（确保 DOM 元素已渲染）
@@ -145,7 +145,7 @@ export function UserCenterPage() {
       }
     };
 
-    initPasswordCaptcha();
+    void initPasswordCaptcha();
   }, [verifyPasswordDialogVisible, captchaEnabled]);
 
   // 初始化 Account API 服务
@@ -190,22 +190,22 @@ export function UserCenterPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      loadAccountInfo();
+      void loadAccountInfo();
     }
   }, [isAuthenticated, loadAccountInfo]);
 
   // 邮箱验证码倒计时
   useEffect(() => {
     if (emailCountdown > 0) {
-      const timer = setTimeout(() => setEmailCountdown(emailCountdown - 1), 1000);
-      return () => clearTimeout(timer);
+      const timer = setTimeout(() => { setEmailCountdown(emailCountdown - 1); }, 1000);
+      return () => { clearTimeout(timer); };
     }
   }, [emailCountdown]);
 
   // 手机验证码倒计时
   useEffect(() => {
     if (phoneCountdown > 0) {
-      const timer = setTimeout(() => setPhoneCountdown(phoneCountdown - 1), 1000);
+      const timer = setTimeout(() => { setPhoneCountdown(phoneCountdown - 1); }, 1000);
       return () => clearTimeout(timer);
     }
   }, [phoneCountdown]);
@@ -568,7 +568,7 @@ export function UserCenterPage() {
                     <Space direction="vertical" style={{ width: '100%' }}>
                       <Input
                         value={avatarUrl}
-                        onChange={(val) => setAvatarUrl(val as string)}
+                        onChange={(val) => { setAvatarUrl(val as string); }}
                         placeholder="请输入头像 URL"
                       />
                       <Space>
@@ -595,7 +595,7 @@ export function UserCenterPage() {
                     <Button
                       variant="outline"
                       icon={<EditIcon />}
-                      onClick={() => setEditingAvatar(true)}
+                      onClick={() => { setEditingAvatar(true); }}
                     >
                       更换头像
                     </Button>
@@ -626,7 +626,7 @@ export function UserCenterPage() {
                     <Space>
                       <Input
                         value={nameValue}
-                        onChange={(val) => setNameValue(val as string)}
+                        onChange={(val) => { setNameValue(val as string); }}
                         placeholder="请输入姓名"
                         style={{ width: '200px' }}
                       />
@@ -659,7 +659,7 @@ export function UserCenterPage() {
                       <Button
                         variant="text"
                         icon={<EditIcon />}
-                        onClick={() => setEditingName(true)}
+                        onClick={() => { setEditingName(true); }}
                       >
                         编辑
                       </Button>
@@ -765,7 +765,7 @@ export function UserCenterPage() {
             <Input
               type="password"
               value={currentPassword}
-              onChange={(val) => setCurrentPassword(val as string)}
+              onChange={(val) => { setCurrentPassword(val as string); }}
               placeholder="请输入当前密码进行身份验证"
               onEnter={handleVerifyPasswordForAction}
             />
@@ -792,7 +792,7 @@ export function UserCenterPage() {
             <Input
               type="password"
               value={newPassword}
-              onChange={(val) => setNewPassword(val as string)}
+              onChange={(val) => { setNewPassword(val as string); }}
               placeholder="请输入新密码（至少8位）"
             />
           </FormItem>
@@ -800,7 +800,7 @@ export function UserCenterPage() {
             <Input
               type="password"
               value={confirmPassword}
-              onChange={(val) => setConfirmPassword(val as string)}
+              onChange={(val) => { setConfirmPassword(val as string); }}
               placeholder="请再次输入新密码"
             />
           </FormItem>
@@ -823,7 +823,7 @@ export function UserCenterPage() {
           <FormItem label="新邮箱" requiredMark>
             <Input
               value={newEmail}
-              onChange={(val) => setNewEmail(val as string)}
+              onChange={(val) => { setNewEmail(val as string); }}
               placeholder="请输入新邮箱地址"
             />
           </FormItem>
@@ -831,7 +831,7 @@ export function UserCenterPage() {
             <Space>
               <Input
                 value={emailCode}
-                onChange={(val) => setEmailCode(val as string)}
+                onChange={(val) => { setEmailCode(val as string); }}
                 placeholder="请输入验证码"
                 style={{ width: '150px' }}
               />
@@ -868,7 +868,7 @@ export function UserCenterPage() {
           <FormItem label="国家/地区" requiredMark>
             <Select
               value={phoneCountryCode}
-              onChange={(val) => setPhoneCountryCode(val as string)}
+              onChange={(val) => { setPhoneCountryCode(val as string); }}
               options={[
                 { label: '🇨🇳 中国大陆 (+86)', value: '+86' },
                 { label: '🇺🇸 美国 (+1)', value: '+1' },
@@ -884,7 +884,7 @@ export function UserCenterPage() {
           <FormItem label="新手机号" requiredMark>
             <Input
               value={newPhone}
-              onChange={(val) => setNewPhone(val as string)}
+              onChange={(val) => { setNewPhone(val as string); }}
               placeholder="请输入手机号（不含区号）"
             />
           </FormItem>
@@ -892,7 +892,7 @@ export function UserCenterPage() {
             <Space>
               <Input
                 value={phoneCode}
-                onChange={(val) => setPhoneCode(val as string)}
+                onChange={(val) => { setPhoneCode(val as string); }}
                 placeholder="请输入验证码"
                 style={{ width: '150px' }}
               />

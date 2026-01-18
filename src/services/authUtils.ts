@@ -53,7 +53,7 @@ export function clearLocalAuthState(): void {
     }
   }
   
-  keysToRemove.forEach(key => localStorage.removeItem(key));
+  keysToRemove.forEach(key => { localStorage.removeItem(key); });
   
   // 清除 sessionStorage
   const sessionKeysToRemove: string[] = [];
@@ -63,7 +63,7 @@ export function clearLocalAuthState(): void {
       sessionKeysToRemove.push(key);
     }
   }
-  sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
+  sessionKeysToRemove.forEach(key => { sessionStorage.removeItem(key); });
 }
 
 // 处理认证失败 - 退出登录并重定向到登录页

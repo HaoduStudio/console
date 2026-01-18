@@ -59,7 +59,7 @@ export const ResourceManagement = () => {
       }
     };
 
-    initService();
+    void initService();
   }, [getAccessToken]);
 
   // 加载数据
@@ -101,7 +101,7 @@ export const ResourceManagement = () => {
 
   useEffect(() => {
     if (service) {
-      loadResources(1, 10, statusFilter);
+      void loadResources(1, 10, statusFilter);
     }
   }, [service, loadResources, statusFilter]);
 
@@ -112,7 +112,7 @@ export const ResourceManagement = () => {
     try {
       await service.approveResource(resource.id);
       MessagePlugin.success('资源已审核通过');
-      loadResources(current, pageSize, statusFilter);
+      void loadResources(current, pageSize, statusFilter);
     } catch (error) {
       console.error('审核失败:', error);
       MessagePlugin.error('审核失败');
@@ -365,10 +365,10 @@ export const ResourceManagement = () => {
                 total={total}
                 pageSizeOptions={[10, 20, 50]}
                 onChange={(pageInfo) => {
-                  loadResources(pageInfo.current, pageInfo.pageSize, statusFilter);
+                  void loadResources(pageInfo.current, pageInfo.pageSize, statusFilter);
                 }}
                 onPageSizeChange={(size, pageInfo) => {
-                  loadResources(pageInfo.current, size, statusFilter);
+                  void loadResources(pageInfo.current, size, statusFilter);
                 }}
               />
             </div>
@@ -382,14 +382,14 @@ export const ResourceManagement = () => {
         confirmBtn="确定"
         cancelBtn="取消"
         onConfirm={handleSubmitReject}
-        onCancel={() => setRejectDialogVisible(false)}
-        onClose={() => setRejectDialogVisible(false)}
+        onCancel={() => { setRejectDialogVisible(false); }}
+        onClose={() => { setRejectDialogVisible(false); }}
       >
         <div className="reject-dialog-content">
           <p>请输入拒绝原因：</p>
           <Textarea
             value={rejectReason}
-            onChange={(value) => setRejectReason(value as string)}
+            onChange={(value) => { setRejectReason(value as string); }}
             placeholder="例如：图片质量不符合要求"
             rows={4}
           />
@@ -401,8 +401,8 @@ export const ResourceManagement = () => {
         header="资源详情"
         cancelBtn="关闭"
         confirmBtn={null}
-        onClose={() => setDetailDialogVisible(false)}
-        onCancel={() => setDetailDialogVisible(false)}
+        onClose={() => { setDetailDialogVisible(false); }}
+        onCancel={() => { setDetailDialogVisible(false); }}
         width="600px"
       >
         {currentDetailResource && (

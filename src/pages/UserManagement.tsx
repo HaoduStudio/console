@@ -51,7 +51,7 @@ export const UserManagement = () => {
       }
     };
 
-    initService();
+    void initService();
   }, [getAccessToken]);
 
   // 加载数据
@@ -79,7 +79,7 @@ export const UserManagement = () => {
 
   useEffect(() => {
     if (service) {
-      loadUsers(1, 10);
+      void loadUsers(1, 10);
     }
   }, [service, loadUsers]);
 
@@ -135,7 +135,7 @@ export const UserManagement = () => {
       }
 
       setDialogVisible(false);
-      loadUsers(current, pageSize);
+      void loadUsers(current, pageSize);
     } catch (error) {
       console.error('提交失败:', error);
       MessagePlugin.error('操作失败');
@@ -238,7 +238,7 @@ export const UserManagement = () => {
           <Button
             theme="primary"
             icon={<PlusIcon />}
-            onClick={() => handleOpenDialog()}
+            onClick={() => { handleOpenDialog(); }}
           >
             新增用户
           </Button>
@@ -266,10 +266,10 @@ export const UserManagement = () => {
                 total={total}
                 pageSizeOptions={[10, 20, 50]}
                 onChange={(pageInfo) => {
-                  loadUsers(pageInfo.current, pageInfo.pageSize);
+                  void loadUsers(pageInfo.current, pageInfo.pageSize);
                 }}
                 onPageSizeChange={(size, pageInfo) => {
-                  loadUsers(pageInfo.current, size);
+                  void loadUsers(pageInfo.current, size);
                 }}
               />
             </div>
@@ -283,8 +283,8 @@ export const UserManagement = () => {
         confirmBtn="保存"
         cancelBtn="取消"
         onConfirm={handleSubmit}
-        onCancel={() => setDialogVisible(false)}
-        onClose={() => setDialogVisible(false)}
+        onCancel={() => { setDialogVisible(false); }}
+        onClose={() => { setDialogVisible(false); }}
       >
         <Form form={form} labelWidth={100}>
           <FormItem

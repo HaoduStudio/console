@@ -59,7 +59,7 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => { window.removeEventListener('resize', handleResize); };
   }, [handleResize]);
 
   useEffect(() => {
@@ -183,7 +183,7 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
         {isMobile && (
           <Drawer
             visible={drawerVisible}
-            onClose={() => setDrawerVisible(false)}
+            onClose={() => { setDrawerVisible(false); }}
             placement="left"
             size="232px"
             header={

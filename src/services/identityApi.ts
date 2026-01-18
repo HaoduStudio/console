@@ -62,7 +62,7 @@ export class IdentityApiService {
     });
 
     if (response.status === 401) {
-      handleAuthenticationFailure();
+      void handleAuthenticationFailure();
       throw new Error('Authentication failed');
     }
 
