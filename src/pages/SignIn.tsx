@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLogto } from '@logto/react';
 import { Button, Checkbox, Link, MessagePlugin } from 'tdesign-react';
 import { redirectUri } from '../config/logto';
@@ -9,6 +9,12 @@ export function SignInPage() {
   const [agreed, setAgreed] = useState(false);
   const [showError, setShowError] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      window.location.assign('/');
+    }
+  }, [isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -24,7 +30,6 @@ export function SignInPage() {
   }
 
   if (isAuthenticated) {
-    window.location.href = '/';
     return null;
   }
 
