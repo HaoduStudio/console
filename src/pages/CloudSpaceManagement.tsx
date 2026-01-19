@@ -409,9 +409,17 @@ export function CloudSpaceManagement() {
             className="code-text"
             role="button"
             tabIndex={0}
-            onClick={() => {
-              navigator.clipboard.writeText(row.code);
-              MessagePlugin.success('已复制到剪贴板');
+            onClick={async () => {
+              if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+                MessagePlugin.error('当前浏览器不支持复制功能');
+                return;
+              }
+              try {
+                await navigator.clipboard.writeText(row.code);
+                MessagePlugin.success('已复制到剪贴板');
+              } catch (error) {
+                MessagePlugin.error('复制失败，请检查浏览器设置');
+              }
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
