@@ -9,10 +9,12 @@ import { HomePage } from './pages/Home';
 import { UserCenterPage } from './pages/UserCenter';
 import { ResourceMarketPage } from './pages/ResourceMarket';
 import { MyResourcesPage } from './pages/MyResources';
+import { CloudSpacePage } from './pages/CloudSpace';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { UserManagement } from './pages/UserManagement';
 import { ResourceManagement } from './pages/ResourceManagement';
 import { AnnouncementManagement } from './pages/AnnouncementManagement';
+import { CloudSpaceManagement } from './pages/CloudSpaceManagement';
 import { MainLayout } from './layouts/MainLayout';
 import { AdminLayout } from './layouts/AdminLayout';
 
@@ -82,6 +84,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/cloud-space"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <CloudSpacePage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
           
           {/* 管理员路由 */}
           <Route
@@ -120,6 +132,16 @@ function App() {
               <ProtectedRoute>
                 <AdminLayout>
                   <AnnouncementManagement />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/cloud-space"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <CloudSpaceManagement />
                 </AdminLayout>
               </ProtectedRoute>
             }

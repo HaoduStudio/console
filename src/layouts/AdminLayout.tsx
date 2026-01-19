@@ -8,7 +8,8 @@ import {
   LogoutIcon,
   ViewListIcon,
   CloudIcon,
-  HomeIcon
+  HomeIcon,
+  ControlPlatformIcon,
 } from 'tdesign-icons-react';
 import { useLogto } from '@logto/react';
 import { postSignOutRedirectUri } from '../config/logto';
@@ -135,6 +136,9 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       </MenuItem>
       <MenuItem value="/admin/resources" icon={<CloudIcon />}>
         资源管理
+      </MenuItem>
+      <MenuItem value="/admin/cloud-space" icon={<ControlPlatformIcon />}>
+        云空间管理
       </MenuItem>
     </Menu>
   );

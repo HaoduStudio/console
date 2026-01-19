@@ -168,3 +168,139 @@
 .t-dialog .t-divider {
   margin: 16px 0;
 }
+
+/* 云空间样式 */
+.card-title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title-with-icon svg {
+  color: var(--td-brand-color);
+}
+
+.cloud-space-card .t-card__actions {
+  margin-right: 0;
+}
+
+.cloud-space-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.cloud-space-empty {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.cloud-space-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cloud-space-usage .usage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cloud-space-usage .usage-text {
+  font-size: 14px;
+  color: var(--td-text-color-primary);
+}
+
+.cloud-space-usage .usage-percent {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--td-brand-color);
+}
+
+.cloud-space-usage .usage-detail {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--td-text-color-secondary);
+}
+
+.cloud-space-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 配额明细样式 */
+.segment-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.segment-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.segment-size {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--td-brand-color);
+}
+
+.segment-note {
+  font-size: 12px;
+  color: var(--td-text-color-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.segment-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--td-bg-color-container-select);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--td-brand-color);
+  font-size: 20px;
+}
+
+/* 兑换提示样式 */
+.redeem-tips {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--td-bg-color-container-select);
+  border-radius: 6px;
+}
+
+.redeem-tips p {
+  margin: 0;
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--td-text-color-secondary);
+}
+
+/* 移动端适配 - 云空间 */
+@media (max-width: 768px) {
+  .cloud-space-actions {
+    flex-direction: column;
+  }
+
+  .cloud-space-actions .t-button {
+    width: 100%;
+  }
+
+  .segment-note {
+    max-width: 150px;
+  }
+}
