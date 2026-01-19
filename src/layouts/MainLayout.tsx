@@ -133,8 +133,8 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <MenuItem value="/resource/market" icon={<ShopIcon />}>资源市场</MenuItem>
         <MenuItem value="/resource/my" icon={<FolderIcon />}>我的资源</MenuItem>
       </SubMenu>
-      <MenuItem value="/sync" icon={<CloudIcon />}>
-        云同步
+      <MenuItem value="/cloud-space" icon={<CloudIcon />}>
+        云空间
       </MenuItem>
       <MenuItem value="/devices" icon={<WatchIcon />}>
         我的设备

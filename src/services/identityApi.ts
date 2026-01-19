@@ -21,6 +21,11 @@ export interface UserRole {
   remark: string | null;
   created_at: string;
   updated_at: string;
+  // 云空间信息（管理员查询时返回）
+  used_kb?: number;
+  available_kb?: number;
+  total_quota_kb?: number;
+  default_quota_kb?: number;
 }
 
 export interface UserRoleStats {
