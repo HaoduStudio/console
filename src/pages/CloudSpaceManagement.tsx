@@ -405,11 +405,20 @@ export function CloudSpaceManagement() {
       title: '兑换码',
       cell: ({ row }) => (
         <Tooltip content="点击复制">
-          <span 
-            className="code-text" 
+          <span
+            className="code-text"
+            role="button"
+            tabIndex={0}
             onClick={() => {
               navigator.clipboard.writeText(row.code);
               MessagePlugin.success('已复制到剪贴板');
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                navigator.clipboard.writeText(row.code);
+                MessagePlugin.success('已复制到剪贴板');
+              }
             }}
           >
             {row.code}
