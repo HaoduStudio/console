@@ -278,7 +278,7 @@ export function CloudSpaceManagement() {
       if (newCodeExpiresAt) {
         params.code_expires_at = newCodeExpiresAt;
       }
-      if (newCodeGrantValidDays) {
+      if (newCodeGrantValidDays != null) {
         params.grant_valid_days = newCodeGrantValidDays;
       }
       if (newCodeMaxRedemptions !== undefined && newCodeMaxRedemptions > 0) {
