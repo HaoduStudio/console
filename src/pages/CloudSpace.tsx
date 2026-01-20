@@ -16,7 +16,6 @@ import {
   CloudIcon,
   GiftIcon,
   TicketIcon,
-  UserIcon,
   RefreshIcon,
   InfoCircleIcon,
 } from 'tdesign-icons-react';
