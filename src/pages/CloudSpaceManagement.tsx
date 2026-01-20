@@ -72,9 +72,10 @@ const SizeInput = ({ value, onChange }: SizeInputProps) => {
     }
   }, [value]);
 
-  const handleNumChange = (v: number) => {
-    setNumValue(v);
-    const kb = unit === 'GB' ? v * 1024 * 1024 : v * 1024;
+  const handleNumChange = (v: number | null) => {
+    const safeVal = Number.isFinite(v as number) ? (v as number) : 0;
+    setNumValue(safeVal);
+    const kb = unit === 'GB' ? safeVal * 1024 * 1024 : safeVal * 1024;
     onChange(kb);
   };
 
@@ -130,6 +131,12 @@ export function CloudSpaceManagement() {
   const { getAccessToken, isAuthenticated } = useLogto();
   const apiServiceRef = useRef<CloudSpaceApiService | null>(null);
 
+  const getDefaultExpireDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 7);
+    return date.toISOString().split('T')[0];
+  };
+
   const [roleConfigs, setRoleConfigs] = useState<RoleQuotaConfig[]>([]);
   const [roleConfigLoading, setRoleConfigLoading] = useState(false);
   const [editRoleDialogVisible, setEditRoleDialogVisible] = useState(false);
@@ -146,7 +153,7 @@ export function CloudSpaceManagement() {
   
   const [newCode, setNewCode] = useState('');
   const [newCodeSpaceKb, setNewCodeSpaceKb] = useState<number>(10240);
-  const [newCodeExpiresAt, setNewCodeExpiresAt] = useState<string>('');
+  const [newCodeExpiresAt, setNewCodeExpiresAt] = useState<string>(getDefaultExpireDate());
   const [newCodeGrantValidDays, setNewCodeGrantValidDays] = useState<number>(30);
   const [newCodeMaxRedemptions, setNewCodeMaxRedemptions] = useState<number | undefined>(undefined);
 
@@ -225,7 +232,7 @@ export function CloudSpaceManagement() {
 
   const handleEditRoleConfig = (role: string, currentSizeKb: number) => {
     setEditingRole(role);
-    setEditingRoleSizeKb(currentSizeKb);
+    setEditingRoleSizeKb(Number.isFinite(currentSizeKb) ? currentSizeKb : 0);
     setEditRoleDialogVisible(true);
   };
 
@@ -269,15 +276,18 @@ export function CloudSpaceManagement() {
       return;
     }
 
+    if (!newCodeExpiresAt) {
+      MessagePlugin.warning('兑换码过期时间为必填项');
+      return;
+    }
+
     setCreatingCode(true);
     try {
       const params: CreateRedeemCodeParams = {
         code: newCode.trim().toUpperCase(),
         space_kb: newCodeSpaceKb,
+        code_expires_at: newCodeExpiresAt,
       };
-      if (newCodeExpiresAt) {
-        params.code_expires_at = newCodeExpiresAt;
-      }
       if (newCodeGrantValidDays != null) {
         params.grant_valid_days = newCodeGrantValidDays;
       }
@@ -301,7 +311,7 @@ export function CloudSpaceManagement() {
   const resetCreateCodeForm = () => {
     setNewCode('');
     setNewCodeSpaceKb(10240);
-    setNewCodeExpiresAt('');
+    setNewCodeExpiresAt(getDefaultExpireDate());
     setNewCodeGrantValidDays(30);
     setNewCodeMaxRedemptions(undefined);
   };
@@ -381,7 +391,7 @@ export function CloudSpaceManagement() {
     {
       colKey: 'size_kb',
       title: '默认配额',
-      cell: ({ row }) => formatStorageSize(row.size_kb),
+      cell: ({ row }) => formatStorageSize(row.size_kb || 0),
     },
     {
       colKey: 'action',
@@ -437,7 +447,7 @@ export function CloudSpaceManagement() {
     {
       colKey: 'space_kb',
       title: '空间大小',
-      cell: ({ row }) => formatStorageSize(row.space_kb),
+      cell: ({ row }) => formatStorageSize(row.space_kb || 0),
     },
     {
       colKey: 'code_expires_at',
@@ -716,7 +726,7 @@ export function CloudSpaceManagement() {
           <FormItem label="空间有效期">
             <InputNumber
               value={newCodeGrantValidDays}
-              onChange={(val) => setNewCodeGrantValidDays(val as number)}
+              onChange={(val) => setNewCodeGrantValidDays(Number.isFinite(val as number) ? (val as number) : 0)}
               suffix="天"
               min={1}
               style={{ width: '100%' }}
@@ -726,7 +736,7 @@ export function CloudSpaceManagement() {
           <FormItem label="最大兑换次数">
             <InputNumber
               value={newCodeMaxRedemptions}
-              onChange={(val) => setNewCodeMaxRedemptions(val as number | undefined)}
+              onChange={(val) => setNewCodeMaxRedemptions(Number.isFinite(val as number) ? (val as number) : undefined)}
               placeholder="不限制"
               min={1}
               style={{ width: '100%' }}

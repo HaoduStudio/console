@@ -8,11 +8,9 @@ import {
   Form,
   Input,
   Progress,
-  Tag,
   List,
   Loading,
   Divider,
-  Tooltip,
 } from 'tdesign-react';
 import {
   CloudIcon,
@@ -20,6 +18,7 @@ import {
   TicketIcon,
   UserIcon,
   RefreshIcon,
+  InfoCircleIcon,
 } from 'tdesign-icons-react';
 import {
   CloudSpaceApiService,
@@ -43,6 +42,8 @@ export function CloudSpacePage() {
   const [redeemDialogVisible, setRedeemDialogVisible] = useState(false);
   const [redeemCode, setRedeemCode] = useState('');
   const [redeeming, setRedeeming] = useState(false);
+  const [quotaDetailsVisible, setQuotaDetailsVisible] = useState(false);
+  const [hasSignedInToday, setHasSignedInToday] = useState(false);
 
   // 初始化云空间服务
   const initCloudSpaceService = useCallback(async () => {
@@ -103,8 +104,10 @@ export function CloudSpacePage() {
       const result = await service.checkIn();
       if (result.already_checked_in) {
         MessagePlugin.warning(result.message || '今日已签到');
+        setHasSignedInToday(true);
       } else {
         MessagePlugin.success(`签到成功！获得 ${formatStorageSize(result.reward_kb || 0)} 云空间`);
+        setHasSignedInToday(true);
         await loadCloudQuota();
       }
     } catch (error) {
@@ -191,7 +194,16 @@ export function CloudSpacePage() {
             </div>
             <div className="quota-details">
               <div className="quota-header">
-                <span className="quota-title">云空间总览</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="quota-title">云空间总览</span>
+                  <Button
+                    shape="circle"
+                    variant="text"
+                    size="small"
+                    icon={<InfoCircleIcon />}
+                    onClick={() => setQuotaDetailsVisible(true)}
+                  />
+                </div>
                 <span className="quota-percent">
                   {calculateUsagePercentage(cloudQuota.used_kb, cloudQuota.total_quota_kb)}%
                 </span>
@@ -245,8 +257,9 @@ export function CloudSpacePage() {
               theme="primary"
               onClick={handleCheckIn}
               loading={checkingIn}
+              disabled={hasSignedInToday}
             >
-              立即签到
+              {hasSignedInToday ? '今日已签到' : '立即签到'}
             </Button>
           </div>
 
@@ -270,48 +283,32 @@ export function CloudSpacePage() {
         </div>
       </Card>
 
-      {cloudQuota && cloudQuota.segments.length > 0 && (
-        <Card className="segments-card" title="配额明细" bordered>
-          <List>
-            {cloudQuota.segments.map((segment: QuotaSegment, index: number) => (
-              <ListItem key={index}>
-                <ListItemMeta
-                  title={
-                    <div className="segment-title">
-                      <span>{getQuotaSourceText(segment.source)}</span>
-                      <Tag 
-                        size="small" 
-                        theme={segment.expires_at ? 'warning' : 'success'}
-                        variant="light"
-                      >
-                        {formatExpiresAt(segment.expires_at)}
-                      </Tag>
-                    </div>
-                  }
-                  description={
-                    <div className="segment-desc">
-                      <span className="segment-size">{formatStorageSize(segment.size_kb)}</span>
-                      {segment.note && (
-                        <Tooltip content={segment.note}>
-                          <span className="segment-note">{segment.note}</span>
-                        </Tooltip>
-                      )}
-                    </div>
-                  }
-                  image={
-                    <div className="segment-icon">
-                      {segment.source === 'role_default' && <UserIcon />}
-                      {segment.source === 'sign_in' && <GiftIcon />}
-                      {segment.source === 'redeem' && <TicketIcon />}
-                      {segment.source === 'admin_grant' && <CloudIcon />}
-                    </div>
-                  }
-                />
-              </ListItem>
-            ))}
-          </List>
-        </Card>
-      )}
+      <Dialog
+        header="配额明细"
+        visible={quotaDetailsVisible}
+        onClose={() => setQuotaDetailsVisible(false)}
+        footer={null}
+        width={480}
+      >
+        <List split>
+          {cloudQuota?.segments.map((segment: QuotaSegment, index: number) => (
+            <ListItem key={index}>
+              <ListItemMeta
+                title={getQuotaSourceText(segment.source)}
+                description={
+                  <div style={{ fontSize: '12px', color: 'var(--td-text-color-secondary)' }}>
+                    <span>{formatExpiresAt(segment.expires_at)}</span>
+                    {segment.note && <span style={{ marginLeft: 8 }}>({segment.note})</span>}
+                  </div>
+                }
+              />
+              <div style={{ fontWeight: 500 }}>
+                {formatStorageSize(segment.size_kb)}
+              </div>
+            </ListItem>
+          ))}
+        </List>
+      </Dialog>
 
       <Dialog
         header="兑换云空间"

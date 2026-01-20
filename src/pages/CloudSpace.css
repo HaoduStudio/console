@@ -168,51 +168,6 @@
   color: var(--td-text-color-secondary);
 }
 
-/* 配额明细卡片 */
-.segments-card {
-  margin-bottom: 16px;
-}
-
-.segment-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.segment-desc {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.segment-size {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--td-brand-color);
-}
-
-.segment-note {
-  font-size: 12px;
-  color: var(--td-text-color-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 250px;
-  cursor: help;
-}
-
-.segment-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: var(--td-bg-color-container-select);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--td-brand-color);
-  font-size: 20px;
-}
-
 /* 兑换提示样式 */
 .redeem-tips {
   margin-top: 16px;

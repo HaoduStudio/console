@@ -75,13 +75,12 @@ export interface PaginatedResponse<T> {
 }
 
 export const formatStorageSize = (kb: number): string => {
-  if (kb < 1024) {
-    return `${kb} KB`;
-  } else if (kb < 1024 * 1024) {
-    return `${(kb / 1024).toFixed(2)} MB`;
-  } else {
-    return `${(kb / 1024 / 1024).toFixed(2)} GB`;
+  if (!Number.isFinite(kb) || kb <= 0) {
+    return '0 KB';
   }
+  if (kb < 1024) return `${kb} KB`;
+  if (kb < 1024 * 1024) return `${(kb / 1024).toFixed(2)} MB`;
+  return `${(kb / 1024 / 1024).toFixed(2)} GB`;
 };
 
 export const getQuotaSourceText = (source: QuotaSource): string => {
