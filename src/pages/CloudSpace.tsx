@@ -34,6 +34,8 @@ const { ListItem, ListItemMeta } = List;
 
 export function CloudSpacePage() {
   const { getAccessToken, isAuthenticated } = useLogto();
+  const getTodayKey = () => new Date().toISOString().slice(0, 10);
+  const checkedKey = 'cloud_space_checked_in_date';
   const [loading, setLoading] = useState(true);
   const [cloudSpaceService, setCloudSpaceService] = useState<CloudSpaceApiService | null>(null);
   const [cloudQuota, setCloudQuota] = useState<CloudQuotaResponse | null>(null);
@@ -42,7 +44,17 @@ export function CloudSpacePage() {
   const [redeemCode, setRedeemCode] = useState('');
   const [redeeming, setRedeeming] = useState(false);
   const [quotaDetailsVisible, setQuotaDetailsVisible] = useState(false);
-  const [hasSignedInToday, setHasSignedInToday] = useState(false);
+  const [hasSignedInToday, setHasSignedInToday] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(checkedKey) === getTodayKey();
+  });
+
+  const markCheckedInToday = () => {
+    setHasSignedInToday(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(checkedKey, getTodayKey());
+    }
+  };
 
   // 初始化云空间服务
   const initCloudSpaceService = useCallback(async () => {
@@ -103,10 +115,10 @@ export function CloudSpacePage() {
       const result = await service.checkIn();
       if (result.already_checked_in) {
         MessagePlugin.warning(result.message || '今日已签到');
-        setHasSignedInToday(true);
+        markCheckedInToday();
       } else {
         MessagePlugin.success(`签到成功！获得 ${formatStorageSize(result.reward_kb || 0)} 云空间`);
-        setHasSignedInToday(true);
+        markCheckedInToday();
         await loadCloudQuota();
       }
     } catch (error) {
@@ -198,8 +210,8 @@ export function CloudSpacePage() {
                   <Button
                     shape="circle"
                     variant="text"
-                    size="small"
-                    icon={<InfoCircleIcon />}
+                    size="medium"
+                    icon={<InfoCircleIcon size="20px" />}
                     onClick={() => setQuotaDetailsVisible(true)}
                   />
                 </div>
